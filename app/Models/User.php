@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\User;
 
 class User extends Authenticatable
 {
@@ -52,4 +53,10 @@ public function pesanan()
             'password' => 'hashed',
         ];
     }
+
+    public function kelolaCustomer()
+{
+    $customers = User::where('role', 'customer')->get(); // asumsinya role disimpan
+    return view('admin.orders.status', compact('customers'));
+}
 }

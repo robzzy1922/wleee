@@ -2,14 +2,15 @@
 
 @section('content')
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
     body {
-        font-family: Arial, sans-serif;
+        font-family: 'Poppins', sans-serif;
         background-color: #E0F2F1;
         margin: 0;
         padding: 0;
     }
 
-    /* Navbar */
     .navbar {
         background-color: #00796B;
         color: white;
@@ -52,19 +53,21 @@
         left: 0;
     }
 
-    .sidebar a {
+    /* .sidebar a {
         padding: 16px 24px;
         text-decoration: none;
         color: white;
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 10px;
         transition: background 0.3s;
-    }
+    } */
 
     .sidebar a:hover {
         background-color: #3c3f4a;
     }
 
-    .container {
+    .container2 {
         max-width: 1200px;
         margin: 100px auto 40px auto;
         padding: 20px;
@@ -83,27 +86,13 @@
     }
 
     .hero-section h1 {
-        font-size: 24px;
+        font-size: 28px;
+        font-weight: 600;
         margin-bottom: 10px;
     }
 
     .hero-section p {
         font-size: 16px;
-    }
-
-    .service-button {
-        background: red;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-        transition: 0.3s;
-        margin-top: 10px;
-    }
-
-    .service-button:hover {
-        background: darkred;
     }
 
     .service-info {
@@ -125,17 +114,17 @@
 </style>
 
 <!-- Navbar -->
-<div class="navbar">
+{{-- <div class="navbar">
     <button id="toggleSidebar" class="menu-btn">&#9776;</button>
-    <span>TechFix</span>
-</div>
+    <span class="font-bold text-lg">TechFix</span>
+</div> --}}
 
 <!-- Sidebar -->
 <div id="sidebar" class="sidebar">
-    <a href="{{ route('customer.tracking') }}">Lacak Status Perbaikan</a>
+    <a href="{{ route('customer.pesanan.index') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Pesanan Saya</a>
     <a href="{{ route('customer.pembayaran') }}">Pembayaran</a>
-    <a href="{{ route('customer.riwayat') }}">Riwayat Pemesanan</a>
-    <a href="{{ route('customer.ulasan') }}">Ulasan & Rating</a>
+    <a href="{{ route('customer.riwayat') }}">Riwayat Pesanan</a>
+    <a href="{{ route('customer.ulasan') }}">Ulasan</a>
 </div>
 
 <!-- Notifikasi -->
@@ -153,21 +142,29 @@
         </script>
     @endif
 @endforeach
+
 <!-- Konten Utama -->
-<div class="container">
+<div class="container2">
     <div class="hero-section">
         <h1>Service Laptop, Printer, dan Komputer Terbaik di Kota Indramayu</h1>
-        <p>Panggil Techfix untuk layanan terbaik di kota Anda. Kami siap membantu dengan gratis antar jemput dan pembayaran setelah servis selesai.</p>
-        <a href="{{ route('pesanan.create') }}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Mau Servis</a>
+        <p>Panggil TechFix untuk layanan terbaik di kota Anda. Kami siap membantu dengan gratis antar jemput dan pembayaran setelah servis selesai.</p>
+        <a href="{{ route('pesanan.create') }}" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-5 rounded-lg mt-4 inline-block transition duration-300">Mau Servis</a>
     </div>
-    <div class="service-info">
-        <h3>Jenis Layanan</h3>
-        <p>- Service Laptop</p>
-        <p>- Service Printer</p>
-        <p>- Service Komputer</p>
+
+    <div class="service-info text-left mt-6">
+        <h3 class="font-semibold text-lg mb-2">Jenis Layanan</h3>
+        <ul class="list-disc list-inside">
+            <li>Service Laptop</li>
+            <li>Service Printer</li>
+            <li>Service Komputer</li>
+            <li>AC</li>
+            <li>Kipas Angin</li></li>
+            <li>Dan Barang Elektronik Lainnya</li>
+        </ul>
     </div>
 </div>
 
+<!-- Sidebar Toggle Script -->
 <script>
     document.getElementById("toggleSidebar").addEventListener("click", function () {
         document.getElementById("sidebar").classList.toggle("active");

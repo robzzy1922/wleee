@@ -33,7 +33,7 @@
         <div class="container mx-auto flex justify-between items-center">
             <a href="/" class="text-xl font-bold">Techfix</a>
             <ul class="flex space-x-6 items-center">
-                <li><a href="#" class="px-4 py-2 rounded-md font-semibold">Home</a></li>
+                <li><a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-md font-semibold">Home</a></li>
                 <li><a href="#" class="px-4 py-2 rounded-md font-semibold">Kami Menjual</a></li>
                 <li><a href="{{ route('faq') }}" class="px-4 py-2 rounded-md font-semibold">FAQ</a></li>
                 <li><a href="#" class="px-4 py-2 rounded-md font-semibold">Kontak</a></li>
@@ -67,15 +67,16 @@
                     <!-- Dropdown Profil -->
                     <li x-data="{ open: false }" class="relative">
                         <button @click="open = !open" class="flex items-center space-x-2 px-4 py-2 rounded-md font-semibold">
-                            <img src="https://via.placeholder.com/40" alt="Avatar" class="w-8 h-8 rounded-full">
+                            <img src="{{ Auth::user()->photo ? asset('storage/' . Auth::user()->photo) : '' }}" alt="Avatar" class="w-8 h-8 rounded-full">
                             <span>{{ Auth::user()->name }}</span>
                         </button>
                         <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg p-3">
                             <a href="{{ route('profile.edit') }}" class="block px-3 py-2 text-sm">Edit Profil</a>
+                            <a href="{{ route('customer.pesanan.detail', ['id' => Auth::user()->id]) }}" class="block px-3 py-2 text-sm">Pesanan Saya</a>
+                            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="block px-3 py-2 text-sm text-red-500">Logout</a>
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                                 @csrf
                             </form>
-                            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="block px-3 py-2 text-sm text-red-500">Logout</a>
                         </div>
                     </li>
                 @else
@@ -90,10 +91,11 @@
     <!-- Main Content -->
     <div class="container mx-auto">
         @yield('content')
+
     </div>
 
     <!-- Footer -->
-    <footer class="bg-[#000000] text-white py-6 mt-10">
+    <footer class="bg-[#000000] text-white py-6 mt-10" style="position: fixed; bottom: 0; width: 100%;">
         <div class="container mx-auto text-center">
             <p class="text-xs">&copy; 2025 - All rights reserved - Techfix</p>
         </div>

@@ -67,6 +67,13 @@
         <div class="login-form">
             <h3 class="text-center mb-4">Masuk</h3>
 
+            <!-- Tampilkan flash message sukses -->
+            @if (session('status'))
+                <div class="alert alert-success">
+                    {{ session('status') }}
+                </div>
+            @endif
+
             <!-- Tampilkan error jika login gagal -->
             @if ($errors->any())
                 <div class="alert alert-danger">
@@ -81,8 +88,8 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="mb-3">
-                    <label class="form-label">Email / No Telepon</label>
-                    <input type="text" class="form-control" name="email" value="{{ old('email') }}" placeholder="Masukkan email atau no telepon" required>
+                    <label class="form-label">Email</label>
+                    <input type="text" class="form-control" name="email" value="{{ old('email') }}" placeholder="Masukkan email" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Password</label>
@@ -90,10 +97,10 @@
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="rememberMe">
-                        <label class="form-check-label" for="rememberMe">Ingat Aktivitas Masuk Saya</label>
+                        <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                        <label class="form-check-label" for="remember">Ingat Saya</label>
                     </div>
-                    <a href="{{('password.request') }}">Lupa Password?</a>
+                    <a href="{{ route('password.request') }}" class="text-danger text-decoration-none">Lupa Password?</a>
                 </div>
                 <button type="submit" class="btn-login">Masuk</button>
                 <p class="text-center mt-3">Belum punya akun? <a href="{{ route('register') }}" class="text-decoration-none text-danger">Daftar Sekarang</a></p>

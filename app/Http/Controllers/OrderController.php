@@ -86,4 +86,9 @@ public function status($status)
 
     return view('admin.orders.status', compact('orders', 'status'));
 }
+public function index()
+{
+    $orders = Order::with('customer')->get();
+    return view('admin.orders.index', compact('orders'));
+}
 }

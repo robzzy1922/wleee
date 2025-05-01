@@ -14,17 +14,17 @@
     <h2 class="text-2xl font-bold">TechFix Admin</h2>
     <nav>
         <a href="{{ route('admin.dashboard') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Dashboard</a>
-        <a href="{{ route('admin.orders') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Kelola Pesanan</a>
-        <a href="{{ route('admin.orders.byStatus', 'pending') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Ubah Status Pesanan</a>
+        <a href="{{ route('admin.orders') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Data Pesanan</a>
         <a href="{{ route('admin.users') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Data Pengguna</a>
+        <a href="{{ route('admin.pembayaran') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Pembayaran</a>
     </nav>
 </aside>
         <!-- Main Content -->
         <div class="flex-1 flex flex-col">
             <!-- Navbar -->
             <header class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-                <input type="text" placeholder="Cari pelanggan..." class="border px-4 py-2 rounded-lg w-1/3">
-                <div class="flex items-center space-x-4">
+                {{-- <input type="text" placeholder="Cari pelanggan..." class="border px-4 py-2 rounded-lg w-1/3"> --}}
+                <div class="flex items-center space-x-4 ml-auto">
                     <!-- Notifikasi -->
                     <div class="relative">
                         <button @click="showNotif = !showNotif" class="relative">
@@ -50,16 +50,19 @@
                     <!-- Dropdown Profile -->
                     <div class="relative">
                         <button @click="openDropdown = !openDropdown" class="flex items-center space-x-2">
-                            <img src="https://via.placeholder.com/40" class="rounded-full" alt="Profile">
+                            {{-- <img src="https://via.placeholder.com/40" class="rounded-full" alt="Profile"> --}}
                             <span>Admin</span>
                         </button>
 
                         <!-- Dropdown Menu -->
                         <div x-show="openDropdown" @click.away="openDropdown = false"
                             class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg overflow-hidden">
-                            <a href="#" @click.prevent="openEditProfile = true; openDropdown = false"
-                            class="block px-4 py-2 hover:bg-gray-200">Edit Profil</a>
-                            <a href="{{ route('logout') }}" class="block px-4 py-2 text-red-600 hover:bg-gray-200">Logout</a>
+                            {{-- <a href="#" @click.prevent="openEditProfile = true; openDropdown = false"
+                            class="block px-4 py-2 hover:bg-gray-200">Edit Profil</a> --}}
+                            <form action="{{ route('logout') }}" method="POST" class="block">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-200">Logout</button>
+                            </form>
                         </div>
                     </div>
                 </div>

@@ -4,7 +4,7 @@
 <div class="max-w-5xl mx-auto mt-10 p-8 bg-teal-300 rounded-xl shadow-md">
     <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Pesan Jasa Servis</h2>
 
-    <form action="{{ route('pesanan.store') }}" method="POST">
+    <form method="POST" action="{{ route('customer.pesanan.store') }}">
         @csrf
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Kiri -->

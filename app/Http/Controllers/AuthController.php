@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\ValidationException;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -28,7 +27,6 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Redirect sesuai role user
             return Auth::user()->role === 'admin'
                 ? redirect()->route('admin.dashboard')
                 : redirect()->route('dashboard');
@@ -37,7 +35,7 @@ class AuthController extends Controller
         return back()->withErrors(['email' => 'Email atau password salah.'])->withInput();
     }
 
-    // Logout
+    // Proses logout
     public function logout(Request $request)
     {
         Auth::logout();
@@ -62,25 +60,24 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        $user = User::create([
+        User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'user', // Semua yang register otomatis jadi user
+            'role' => 'user', // Semua yang daftar jadi user biasa
         ]);
 
-        Auth::login($user);
-
-        return redirect()->route('dashboard')->with('status', 'Registrasi berhasil!');
+        // Setelah berhasil daftar, arahkan ke login dan kirim flash message
+        return redirect()->route('login')->with('status', 'Registrasi berhasil! Silakan login.');
     }
 
-    // Forgot Password - Form
+    // Tampilkan form lupa password
     public function showForgotPasswordForm()
     {
         return view('auth.forgot-password');
     }
 
-    // Forgot Password - Kirim Email Reset
+    // Kirim link reset password
     public function sendResetLink(Request $request)
     {
         $request->validate(['email' => 'required|email']);
@@ -92,13 +89,13 @@ class AuthController extends Controller
             : back()->withErrors(['email' => trans($status)]);
     }
 
-    // Reset Password - Tampilkan Form Reset
+    // Tampilkan form reset password
     public function showResetForm($token)
     {
         return view('auth.reset-password', ['token' => $token]);
     }
 
-    // Reset Password - Proses Reset
+    // Proses reset password
     public function resetPassword(Request $request)
     {
         $request->validate([

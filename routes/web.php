@@ -15,10 +15,12 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ReviewController; // ✅ Tambahin ini
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 
 // Halaman utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
 // FAQ
 Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 
@@ -27,6 +29,8 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
+Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
 // Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -35,64 +39,99 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::post('/notifikasi-read', [NotifikasiController::class, 'read'])->name('notif.read');
 
 // Route untuk Pesanan
-Route::get('/pesanan/create', [PesananController::class, 'create'])->name('pesanan.create');
-Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanan.store');
+Route::get('/dashboard/pesanan/create', [CustomerController::class, 'createPesanan'])->name('customer.pesanan.create');
+Route::post('/dashboard/pesanan', [CustomerController::class, 'storePesanan'])->name('customer.pesanan.store');
 
 // Route Customer (hanya jika login)
 Route::middleware(['auth'])->group(function () {
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'customerDashboard'])->name('dashboard');
 
+    // Profile
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
+    // Order
     Route::get('/order', [OrderController::class, 'create'])->name('customer.order');
     Route::post('/order', [OrderController::class, 'store'])->name('customer.order.store');
+
+    // Pesanan Customer
+    Route::get('/dashboard/pesanan', [CustomerController::class, 'pesananIndex'])->name('customer.pesanan.index');
+    Route::get('/dashboard/pesanan/{id}', [CustomerController::class, 'pesananDetail'])->name('customer.pesanan.detail');
+    Route::post('/dashboard/pesanan', [CustomerController::class, 'storePesanan'])->name('customer.pesanan.store');
+    Route::get('/pesanan/create', [CustomerController::class, 'createPesanan'])->name('pesanan.create');
+
+    // Riwayat Servis
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard/riwayat', [CustomerController::class, 'riwayatServis'])->name('riwayat.servis');
+    Route::post('/review/store', [ReviewController::class, 'store'])->name('review.store');
+});
+
+
+    // Ulasan
+    Route::get('/dashboard/ulasan', [CustomerController::class, 'ulasan'])->name('customer.ulasan');
+    Route::post('/dashboard/ulasan', [CustomerController::class, 'storeReview'])->name('ulasan.store');
+
+    // Pembayaran
+    Route::get('/dashboard/pembayaran', [CustomerController::class, 'pembayaran'])->name('customer.pembayaran');
 });
 
 // Route Admin
 Route::prefix('admin')->middleware(['auth'])->group(function () {
+    // Admin Dashboard
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-    Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+
+    // Orders Management
     Route::get('/orders/{id}/edit', [AdminController::class, 'editStatus'])->name('admin.orders.edit');
     Route::get('/pesanan', [AdminController::class, 'statusList'])->name('admin.kelola.pesanan');
     Route::get('/pesanan/{id}', [AdminController::class, 'detail'])->name('admin.pesanan.detail');
     Route::post('/pesanan/{id}/kirim-harga', [PesananController::class, 'kirimHarga'])->name('pesanan.kirimHarga');
+    Route::post('/admin/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('admin.kelola-pesanan');
     Route::get('/kelola-pesanan', [AdminController::class, 'kelolaPesanan'])->name('admin.orders');
     Route::get('/data-pengguna', [AdminController::class, 'users'])->name('admin.users');
-    Route::get('/service-history', [ServiceController::class, 'history'])->name('service.history');
-    Route::get('/riwayat-pembelian', [PurchaseController::class, 'history'])->name('purchase.history');
-    Route::get('/ubah-status-pesanan', [AdminController::class, 'statusList'])->name('admin.orders.status');
+    Route::get('/admin/pembayaran', [PembayaranController::class, 'index'])->name('admin.pembayaran');
+    Route::get('/admin/orders/all', [OrderController::class, 'index'])->name('admin.orders.all');
+    Route::post('/admin/orders/status', [OrderController::class, 'updateStatus'])->name('admin.orders.status');
+    // File: routes/web.php
+    Route::resource('customers', CustomerController::class);
+
+    Route::prefix('admin')->group(function () {
+        Route::resource('orders', OrderController::class);
+    });
+
+
+    // Service & Purchase History
+    // Route::get('/service-history', [ServiceController::class, 'history'])->name('service.history');
+    // Route::get('/riwayat-pembelian', [PurchaseController::class, 'history'])->name('purchase.history');
+    Route::get('/customer/riwayat', [CustomerController::class, 'riwayat'])->name('customer.riwayat');
+
+    // Manage Orders Status
     Route::get('/ubah-status/{id}', [AdminController::class, 'editStatus'])->name('admin.orders.editStatus');
     Route::patch('/ubah-status/{id}', [AdminController::class, 'updateStatus'])->name('admin.orders.updateStatus');
     Route::patch('/tolak-pesanan/{id}', [AdminController::class, 'rejectOrder'])->name('admin.orders.reject');
-    Route::get('/detail-pesanan/{id}', [AdminController::class, 'detail'])->name('admin.orders.detail');
-    Route::get('/admin/orders/status/{status}', [AdminController::class, 'statusBy'])->name('admin.orders.byStatus');
-    Route::get('/admin/orders/{status}/status', [OrderController::class, 'status'])->name('admin.orders.byStatus');
-    Route::post('/admin/orders/{id}/status', [AdminController::class, 'updateStatus'])->name('admin.orders.update');
-    Route::get('/admin/orders/all', [AdminController::class, 'allOrders'])->name('admin.orders.all');
-    Route::get('/admin/pesanan/{id}', [AdminController::class, 'showPesanan']);
-    Route::get('/admin/detail-pesanan/{id}', [AdminController::class, 'detailPesanan']);
-    Route::delete('/admin/orders/{id}', [OrderController::class, 'destroy'])->name('order.destroy');
-    Route::get('/admin/pesanan/{id}', [AdminController::class, 'showPesanan'])->name('admin.pesanan.show');
-    Route::post('/admin/pesanan/{id}/konfirmasi', [AdminController::class, 'konfirmasiPesanan'])->name('admin.pesanan.konfirmasi');
+
+    // Customer Management
+    Route::get('/kelola-customer', [CustomerController::class, 'index'])->name('admin.customers.index');
+    Route::resource('customers', CustomerController::class);
+
+    // Payment Management
+    Route::get('payments', [PaymentController::class, 'index'])->name('admin.payments.index');
+    Route::get('payments/{id}', [PaymentController::class, 'show'])->name('admin.payments.show');
+    Route::post('payments/{id}/verify', [PaymentController::class, 'verify'])->name('admin.payments.verify');
+    Route::post('payments/{id}/reject', [PaymentController::class, 'reject'])->name('admin.payments.reject');
+
+    // Manage Users
+    Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');  // Daftar pengguna
+    Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');  // Form tambah pengguna
+    Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');  // Simpan pengguna baru
+    Route::get('/admin/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');  // Form edit pengguna
+    Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');  // Update pengguna
+    Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');  // Hapus pengguna
 });
 
-// Route khusus untuk Customer
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard/riwayat', [CustomerController::class, 'riwayat'])->name('customer.riwayat');
-    Route::get('/dashboard/tracking', [CustomerController::class, 'tracking'])->name('customer.tracking');
-    Route::get('/dashboard/ulasan', [CustomerController::class, 'ulasan'])->name('customer.ulasan');
-    Route::post('/dashboard/ulasan', [CustomerController::class, 'storeReview'])->name('ulasan.store');
-});
-
-// Review terpisah (jika mau pakai controller khusus)
+// Review Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/review/{orderId}/create', [ReviewController::class, 'create'])->name('review.create');
     Route::post('/review/{orderId}', [ReviewController::class, 'store'])->name('review.store');
 });
-
-// Pembayaran
-Route::post('/payment/store', [PaymentController::class, 'store'])->name('payment.store');
-Route::get('/dashboard/pembayaran', [CustomerController::class, 'pembayaran'])->name('customer.pembayaran');
-Route::post('/admin/orders/{id}/status', [AdminController::class, 'updateStatus'])->name('admin.orders.status');

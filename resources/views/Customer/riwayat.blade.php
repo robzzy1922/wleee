@@ -2,27 +2,34 @@
 
 @section('content')
 <div class="container mx-auto mt-20 p-6 bg-white rounded-lg shadow-lg">
-    <h2 class="text-2xl font-bold mb-6">Riwayat Servis</h2>
+    <h2 class="text-2xl font-bold mb-6 text-center text-[#004AAD]">Riwayat Servis</h2>
 
     @forelse($riwayat as $item)
-    <div class="bg-white p-4 rounded-lg shadow mb-4">
-        <h3 class="text-lg font-semibold text-[#004AAD]">Pesanan #{{ $item->id }}</h3>
-        <p class="text-sm text-gray-600">Status: {{ $item->status }}</p>
+    <div class="bg-gray-50 p-4 rounded-lg shadow mb-6">
+        <div class="flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-[#004AAD]">{{ $item->nama_barang }}</h3>
+            <span class="text-sm font-medium {{ $item->status == 'Selesai' ? 'text-green-600' : 'text-gray-600' }}">
+                {{ $item->status }}
+            </span>
+        </div>
+        <p class="text-sm text-gray-600">Kerusakan: {{ $item->kerusakan }}</p>
+        <p class="text-sm text-gray-600">Biaya: {{ $item->biaya ? 'Rp ' . number_format($item->biaya, 0, ',', '.') : '-' }}</p>
 
-        @if ($item->status == 'Selesai')
+        @if($item->status == 'Selesai')
             @if ($item->review)
-                {{-- Sudah diberi review --}}
-                <div class="mt-2">
-                    <div class="flex items-center text-yellow-500 mb-1">
-                        @for ($i = 0; $i < $item->review->rating; $i++)
-                            ★
-                        @endfor
-                    </div>
-                    <p class="italic text-gray-700">"{{ $item->review->comment }}"</p>
+                {{-- Tampilkan Review --}}
+                <div class="flex items-center mt-3 mb-1">
+                    @for ($i = 0; $i < $item->review->rating; $i++)
+                        <span class="text-yellow-400 text-lg">★</span>
+                    @endfor
+                    @for ($i = $item->review->rating; $i < 5; $i++)
+                        <span class="text-gray-300 text-lg">★</span>
+                    @endfor
                 </div>
+                <p class="italic text-gray-700">"{{ $item->review->comment }}"</p>
             @else
-                {{-- Belum diberi review --}}
-                <form action="{{ route('review.store') }}" method="POST" class="mt-2 space-y-2">
+                {{-- Form Review --}}
+                <form action="{{ route('review.store') }}" method="POST" class="mt-3 space-y-2">
                     @csrf
                     <input type="hidden" name="order_id" value="{{ $item->id }}">
 
@@ -38,7 +45,7 @@
                     <label class="block text-sm font-medium">Komentar:</label>
                     <textarea name="comment" rows="2" class="w-full border border-gray-300 rounded px-2 py-1" placeholder="Tulis ulasan kamu..."></textarea>
 
-                    <button type="submit" class="bg-[#14B8A6] text-white px-4 py-1 rounded hover:bg-[#0D9488]">
+                    <button type="submit" class="bg-[#14B8A6] text-white px-4 py-2 rounded hover:bg-[#0D9488]">
                         Kirim Penilaian
                     </button>
                 </form>
@@ -46,7 +53,9 @@
         @endif
     </div>
     @empty
-        <p class="text-center text-gray-500">Belum ada riwayat servis yang selesai.</p>
+        <div class="text-center text-gray-500 mt-10">
+            Belum ada riwayat servis yang selesai atau dibatalkan.
+        </div>
     @endforelse
 </div>
 @endsection

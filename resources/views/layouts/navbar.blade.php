@@ -2,10 +2,10 @@
     <div class="text-2xl font-bold text-gray-800">TechFix Admin</div>
 
     <!-- Search Bar -->
-    <div class="relative">
+    {{-- <div class="relative">
         <input type="text" placeholder="Cari pelanggan..." class="border p-2 rounded-lg w-64">
         <button class="absolute right-2 top-2 text-gray-500">🔍</button>
-    </div>
+    </div> --}}
 
     <!-- Profile & Notifications -->
     <div class="flex items-center space-x-4">
@@ -19,7 +19,7 @@
 <div x-data="{ open: false }" class="relative">
     <button @click="open = !open" class="flex items-center space-x-2">
         <img src="{{ asset('img/default-avatar.png') }}" alt="Profile" class="w-10 h-10 rounded-full">
-        <span class="font-semibold">Admin</span>
+        <span class="font-semibold">Admin2</span>
     </button>
 
     <!-- Dropdown -->

@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Layanan;
+use App\Models\Payment;
+use App\Models\ProgressPesanan;
+use App\Models\Review;
 
 class Pesanan extends Model
 {
@@ -15,44 +18,47 @@ class Pesanan extends Model
 
     // Field yang bisa diisi
     protected $fillable = [
-        'user_id',
         'nama',
         'alamat',
         'telepon',
         'jenis_barang',
-        'tanggal_pemesanan',
         'keluhan',
+        'user_id',
+        'customer_id',
+        'tanggal_pemesanan',
         'status',
+        'harga',
+        'estimasi',
     ];
 
-    // Relasi ke User (optional tapi berguna banget nanti)
+    // Relasi ke User
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-public function payment()
-{
-    return $this->hasOne(Payment::class);
-}
+    // Relasi ke Payment
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
 
-public function progressTimeline()
-{
-    return $this->hasMany(ProgressPesanan::class);
-}
+    // Relasi ke ProgressPesanan
+    public function progress()
+    {
+        return $this->hasMany(Pesanan::class, 'id', 'pesanan_id'); // Sesuaikan jika diperlukan
+    }
 
-public function customer()
-{
-    return $this->belongsTo(User::class, 'customer_id'); // ganti ke model yang sesuai
-}
+    // Relasi ke Layanan
+    public function layanan()
+    {
+        return $this->belongsTo(Layanan::class, 'layanan_id');
+    }
 
-public function layanan()
-{
-    return $this->belongsTo(Layanan::class, 'layanan_id'); // pastikan 'layanan_id' sesuai dengan nama kolom foreign key
-}
+    // app/Models/Pesanan.php
 
-public function progress()
-{
-    return $this->hasMany(ProgressPesanan::class, 'pesanan_id');
-}
+    public function review()
+    {
+        return $this->hasOne(Review::class);
+    }
 }

@@ -135,7 +135,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-[#14B8A6] text-black py-10 px-6 mt-10">
+    <footer class="bg-[#14B8A6] text-black py-10 px-6 mt-10" >
         <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 text-center md:text-left">
             <div>
                 <h3 class="text-lg font-semibold text-black-400">Techfix</h3>
@@ -162,8 +162,8 @@
                 <p>Jl. Teknisi No. 123, Indramayu</p>
             </div>
         </div>
-        <div class="mt-10 py-4 bg-black text-center">
-            <p class="text-sm text-white">&copy; 2025 - All rights reserved - Techfix</p>
+        <div class="mt-10 py-4 text-center">
+            <p class="text-sm text-black">&copy; 2025 - All rights reserved - Techfix</p>
         </div>
     </footer>
 

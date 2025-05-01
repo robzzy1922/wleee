@@ -9,7 +9,8 @@ use App\Models\Pesanan;
 use App\Models\ProgressPesanan;
 use App\Models\ProgressUpdate;
 use App\Models\ProgressTimeline;
-
+use App\Models\User;
+use App\Models\Pembayaran;
 
 class AdminController extends Controller
 {
@@ -17,9 +18,9 @@ class AdminController extends Controller
 public function index()
 {
     $total = Pesanan::count(); // total semua pesanan
-    $completed = Pesanan::where('status', 'selesai')->count();
-    $pending = Pesanan::where('status', 'menunggu_konfirmasi')->count();
-    $rejected = Pesanan::where('status', 'ditolak')->count();
+    $completed = Pesanan::where('status', 'Selesai')->count();
+    $pending = Pesanan::where('status', 'Menunggu Konfirmasi Admin')->count();
+    $rejected = Pesanan::where('status', 'Ditolak') ->count();
 
     return view('admin.dashboard', compact('total', 'completed', 'pending', 'rejected'));
 }
@@ -91,9 +92,21 @@ public function updateStatus(Request $request, $id)
         return view('admin.orders.status', compact('orders', 'status'));
     }
 
-    public function kelolaPesanan()
+    public function kelolaPesanan(Request $request)
 {
-    $pesanans = Pesanan::all();
+    $query = Pesanan::query();
+
+    // Filter berdasarkan nama
+    if ($request->filled('search')) {
+        $query->where('nama', 'like', '%' . $request->search . '%');
+    }
+
+    // Filter berdasarkan status
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    $pesanans = $query->get();
 
     return view('admin.kelola-pesanan', compact('pesanans'));
 }
@@ -131,5 +144,43 @@ public function konfirmasiPesanan(Request $request, $id)
     $pesanan->save();
 
     return redirect()->route('admin.pesanan.show', $id)->with('success', 'Pesanan berhasil dikonfirmasi.');
+}
+public function users()
+    {
+        // Ambil semua user dengan role customer
+        $customers = User::where('role', 'customer')->get();
+        return view('admin.customers.index', compact('customers'));
+    }
+
+    public function customers()
+    {
+        $customers = User::where('role', 'customer')->get(); // Filter customer berdasarkan role
+        return view('admin.customers.index', compact('customers'));
+    }
+
+    public function edit($id)
+{
+    $customer = User::find($id);
+    return view('admin.customers.edit', compact('customer'));
+}
+
+public function destroy($id)
+{
+    $customer = User::find($id);
+    $customer->delete();
+    return redirect()->route('admin.customers')->with('success', 'Data customer berhasil dihapus!');
+}
+
+public function pembayaran() {
+    $pembayarans = Pembayaran::with('user')->get(); // atau relasi dari pesanan
+    return view('admin.pembayaran', compact('pembayarans'));
+}
+
+public function konfirmasiPembayaran($id) {
+    $pembayaran = Pembayaran::findOrFail($id);
+    $pembayaran->status = 'lunas';
+    $pembayaran->save();
+
+    return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
 }
 }
