@@ -11,70 +11,79 @@ use App\Models\ProgressUpdate;
 use App\Models\ProgressTimeline;
 use App\Models\User;
 use App\Models\Pembayaran;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
 
-public function index()
-{
-    $total = Pesanan::count(); // total semua pesanan
-    $completed = Pesanan::where('status', 'Selesai')->count();
-    $pending = Pesanan::where('status', 'Menunggu Konfirmasi Admin')->count();
-    $rejected = Pesanan::where('status', 'Ditolak') ->count();
+    public function index()
+    {
+        $total = Pesanan::count(); // total semua pesanan
+        $completed = Pesanan::where('status', 'Selesai')->count();
+        $pending = Pesanan::where('status', 'Menunggu Konfirmasi Admin')->count();
+        $rejected = Pesanan::where('status', 'Ditolak')->count();
 
-    return view('admin.dashboard', compact('total', 'completed', 'pending', 'rejected'));
-}
+        return view('admin.dashboard', compact('total', 'completed', 'pending', 'rejected'));
+    }
 
-    public function statusList() {
+    public function statusList()
+    {
         $orders = Order::with('customer')->latest()->get();
         return view('admin.orders.status', compact('orders'));
     }
 
     public function editStatus($id)
-{
-    $pesanan = Order::findOrFail($id);
-    return view('admin.ubah-status', compact('pesanan'));
-}
-
-public function updateStatus(Request $request, $id)
-{
-    $request->validate([
-        'status' => 'required|string',
-        'estimasi' => 'nullable|string|max:255',
-        'harga' => 'nullable|numeric|min:0',
-        'catatan' => 'nullable|string|max:1000',
-    ]);
-
-    $pesanan = Order::findOrFail($id);
-
-    // Simpan data lama untuk membandingkan
-    $oldStatus = $pesanan->status;
-
-    // Update status & data terkait
-    $pesanan->status = $request->status;
-
-    if ($request->status === 'Menunggu Persetujuan Customer') {
-        $pesanan->estimasi = $request->estimasi;
-        $pesanan->harga = $request->harga;
+    {
+        $pesanan = Order::findOrFail($id);
+        return view('admin.ubah-status', compact('pesanan'));
     }
 
-    if ($request->filled('catatan')) {
-        $pesanan->catatan = $request->catatan;
+    public function editProfile()
+    {
+        return view('admin.edit-profile');
     }
 
-    $pesanan->save();
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string',
+            'estimasi' => 'nullable|string|max:255',
+            'harga' => 'nullable|numeric|min:0',
+            'catatan' => 'nullable|string|max:1000',
+        ]);
 
-    // Simpan ke progress timeline
-    ProgressTimeline::create([
-        'pesanan_id' => $pesanan->id,
-        'status' => $request->status,
-        'catatan' => $request->catatan,
-    ]);
+        $pesanan = Order::findOrFail($id);
 
-    return redirect()->route('admin.orders.index')->with('success', 'Status dan riwayat berhasil diperbarui.');
-}
+        // Simpan data lama untuk membandingkan
+        $oldStatus = $pesanan->status;
 
-    public function rejectOrder($id) {
+        // Update status & data terkait
+        $pesanan->status = $request->status;
+
+        if ($request->status === 'Menunggu Persetujuan Customer') {
+            $pesanan->estimasi = $request->estimasi;
+            $pesanan->harga = $request->harga;
+        }
+
+        if ($request->filled('catatan')) {
+            $pesanan->catatan = $request->catatan;
+        }
+
+        $pesanan->save();
+
+        // Simpan ke progress timeline
+        ProgressTimeline::create([
+            'pesanan_id' => $pesanan->id,
+            'status' => $request->status,
+            'catatan' => $request->catatan,
+        ]);
+
+        return redirect()->route('admin.orders.index')->with('success', 'Status dan riwayat berhasil diperbarui.');
+    }
+
+    public function rejectOrder($id)
+    {
         $order = Order::findOrFail($id);
         $order->status = 'Ditolak';
         $order->save();
@@ -82,70 +91,72 @@ public function updateStatus(Request $request, $id)
         return back()->with('success', 'Pesanan telah ditolak.');
     }
 
-    public function detail($id) {
+    public function detail($id)
+    {
         $order = Order::with(['customer', 'progressUpdates'])->findOrFail($id);
         return view('admin.orders.detail', compact('order'));
     }
 
-    public function statusBy($status) {
+    public function statusBy($status)
+    {
         $orders = Order::where('status', $status)->get();
         return view('admin.orders.status', compact('orders', 'status'));
     }
 
     public function kelolaPesanan(Request $request)
-{
-    $query = Pesanan::query();
+    {
+        $query = Pesanan::query();
 
-    // Filter berdasarkan nama
-    if ($request->filled('search')) {
-        $query->where('nama', 'like', '%' . $request->search . '%');
+        // Filter berdasarkan nama
+        if ($request->filled('search')) {
+            $query->where('nama', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $pesanans = $query->get();
+
+        return view('admin.kelola-pesanan', compact('pesanans'));
     }
 
-    // Filter berdasarkan status
-    if ($request->filled('status')) {
-        $query->where('status', $request->status);
+    public function allOrders()
+    {
+        $orders = Order::with('customer')->latest()->get();
+        return view('admin.orders.total', compact('orders'));
     }
 
-    $pesanans = $query->get();
+    // Di Admin\OrderController atau controller yang kamu pakai
+    public function detailPesanan($id)
+    {
+        $pesanan = Pesanan::with(['customer', 'progressTimeline'])->findOrFail($id);
+        return view('admin.orders.detail', compact('pesanan'));
+    }
 
-    return view('admin.kelola-pesanan', compact('pesanans'));
-}
+    public function showPesanan($id)
+    {
+        $pesanan = Pesanan::findOrFail($id);
+        return view('admin.pesanan.detail', compact('pesanan'));
+    }
 
-public function allOrders()
-{
-    $orders = Order::with('customer')->latest()->get();
-    return view('admin.orders.total', compact('orders'));
-}
+    public function konfirmasiPesanan(Request $request, $id)
+    {
+        $request->validate([
+            'harga' => 'required|numeric',
+            'estimasi' => 'required|string|max:255',
+        ]);
 
-// Di Admin\OrderController atau controller yang kamu pakai
-public function detailPesanan($id)
-{
-    $pesanan = Pesanan::with(['customer', 'progressTimeline'])->findOrFail($id);
-    return view('admin.orders.detail', compact('pesanan'));
-}
+        $pesanan = Pesanan::findOrFail($id);
+        $pesanan->harga = $request->harga;
+        $pesanan->estimasi = $request->estimasi;
+        $pesanan->status = 'Menunggu Persetujuan Customer';
+        $pesanan->save();
 
-public function showPesanan($id)
-{
-    $pesanan = Pesanan::findOrFail($id);
-    return view('admin.pesanan.detail', compact('pesanan'));
-}
-
-public function konfirmasiPesanan(Request $request, $id)
-{
-    $request->validate([
-        'harga' => 'required|numeric',
-        'estimasi' => 'required|string|max:255',
-    ]);
-
-    $pesanan = Pesanan::findOrFail($id);
-    $pesanan->harga = $request->harga;
-    $pesanan->estimasi = $request->estimasi;
-    $pesanan->status = 'Menunggu Persetujuan Customer';
-    $pesanan->save();
-
-    return redirect()->route('admin.pesanan.show', $id)->with('success', 'Pesanan berhasil dikonfirmasi.');
-}
-public function users()
+        return redirect()->route('admin.pesanan.show', $id)->with('success', 'Pesanan berhasil dikonfirmasi.');
+    }
+    public function users()
     {
         // Ambil semua user dengan role customer
         $customers = User::where('role', 'customer')->get();
@@ -159,28 +170,67 @@ public function users()
     }
 
     public function edit($id)
+    {
+        $customer = User::find($id);
+        return view('admin.customers.edit', compact('customer'));
+    }
+
+    public function destroy($id)
+    {
+        $customer = User::find($id);
+        $customer->delete();
+        return redirect()->route('admin.customers')->with('success', 'Data customer berhasil dihapus!');
+    }
+
+    public function pembayaran()
+    {
+        $pembayarans = Pembayaran::with('user')->get(); // atau relasi dari pesanan
+        return view('admin.pembayaran', compact('pembayarans'));
+    }
+
+    public function konfirmasiPembayaran($id)
+    {
+        $pembayaran = Pembayaran::findOrFail($id);
+        $pembayaran->status = 'lunas';
+        $pembayaran->save();
+
+        return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
+    }
+
+
+    public function updateProfile(Request $request)
 {
-    $customer = User::find($id);
-    return view('admin.customers.edit', compact('customer'));
-}
+    $user = auth()->user();
 
-public function destroy($id)
-{
-    $customer = User::find($id);
-    $customer->delete();
-    return redirect()->route('admin.customers')->with('success', 'Data customer berhasil dihapus!');
-}
+    // Validasi
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email,' . $user->id,
+        'password' => 'nullable|confirmed|min:6',
+        'photo' => 'nullable|image|max:2048',
+    ]);
 
-public function pembayaran() {
-    $pembayarans = Pembayaran::with('user')->get(); // atau relasi dari pesanan
-    return view('admin.pembayaran', compact('pembayarans'));
-}
+    // Update data
+    $user->name = $validated['name'];
+    $user->email = $validated['email'];
 
-public function konfirmasiPembayaran($id) {
-    $pembayaran = Pembayaran::findOrFail($id);
-    $pembayaran->status = 'lunas';
-    $pembayaran->save();
+    if ($request->filled('password')) {
+        $user->password = Hash::make($validated['password']);
+    }
 
-    return redirect()->back()->with('success', 'Status pembayaran diperbarui!');
+    // Update foto jika ada
+    if ($request->hasFile('photo')) {
+        // Hapus foto lama jika ada
+        if ($user->photo && Storage::exists($user->photo)) {
+            Storage::delete($user->photo);
+        }
+
+        $path = $request->file('photo')->store('profile_photos', 'public');
+        $user->photo = $path;
+    }
+
+    $user->save();
+
+    return redirect()->back()->with('success', 'Profil berhasil diperbarui.');
 }
 }

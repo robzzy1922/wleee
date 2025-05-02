@@ -1,39 +1,74 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto mt-20 p-6 bg-white rounded-lg shadow-lg max-w-3xl pb-5">
-    <h2 class="text-2xl font-bold mb-6">Daftar Pesanan</h2>
+    <div class="container mx-auto mt-10 p-8 bg-white rounded-lg shadow-lg max-w-7xl pb-10 ">
+        <h2 class="text-3xl font-bold mb-8">Daftar Pesanan/Riwayat Pesanan</h2>
 
-    @foreach($pesanans as $pesanan)
-    <div class="mb-8 border-b pb-4">
-        <h3 class="text-xl font-semibold">Detail Pesanan #{{ $pesanan->id }}</h3>
+        <table class="table-auto w-full border-collapse border border-gray-300 pb-5">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border border-gray-300 px-6 py-3">#ID Pesanan</th>
+                    <th class="border border-gray-300 px-6 py-3">Layanan/Barang</th>
+                    <th class="border border-gray-300 px-6 py-3">Deskripsi Kerusakan</th>
+                    <th class="border border-gray-300 px-6 py-3">Tanggal Pemesanan</th>
+                    <th class="border border-gray-300 px-6 py-3 text-center">Status</th>
+                    <th class="border border-gray-300 px-6 py-3 text-center">Rating</th>
 
-        <div class="space-y-2">
-            <p><strong>Layanan/Barang:</strong> {{ $pesanan->jenis_barang }}</p>
-            <p><strong>Deskripsi Kerusakan:</strong> {{ $pesanan->keluhan }}</p>
-            <p><strong>Tanggal Pemesanan:</strong> {{ \Carbon\Carbon::parse($pesanan->tanggal_pemesanan)->format('d M Y H:i') }}</p>
-            <p><strong>Status:</strong>
-                <span class="px-2 py-1 rounded
-                    {{ $pesanan->status == 'Selesai' ? 'bg-green-100 text-green-800' :
-                       ($pesanan->status == 'Dalam Proses Servis' ? 'bg-yellow-100 text-yellow-800' :
-                       'bg-blue-100 text-blue-800') }}">
-                    {{ $pesanan->status }}
-                </span>
-            </p>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($pesanans as $pesanan)
+                    <tr>
+                        <td class="border border-gray-300 px-6 py-3">{{ $pesanan->id }}</td>
+                        <td class="border border-gray-300 px-6 py-3">{{ $pesanan->jenis_barang }}</td>
+                        <td class="border border-gray-300 px-6 py-3">{{ $pesanan->keluhan }}</td>
+                        <td class="border border-gray-300 px-6 py-3 text-center">
+                            {{-- Format tanggal --}}
+                            {{ \Carbon\Carbon::parse($pesanan->tanggal_pemesanan)->format('d M Y') }}
+                        <td class="border border-gray-300 px-6 py-3 text-center">
+                            <span
+                                class="px-3 py-1 rounded
+                        {{ $pesanan->status == 'Selesai'
+                            ? 'bg-green-100 text-green-800'
+                            : ($pesanan->status == 'Dalam Proses Servis'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-blue-100 text-blue-800') }}">
+                                {{ $pesanan->status }}
+                            </span>
+                        </td>
+                        <td class="border border-gray-300 px-6 py-3 text-center">
+                            @if ($pesanan->status == 'Selesai')
+                                @php
+                                    $existingReview = \App\Models\Review::where('pesanan_id', $pesanan->id)
+                                        ->where('user_id', auth()->id())
+                                        ->first();
+                                @endphp
 
-            @if($pesanan->status_pesanan == 'Menunggu Pembayaran')
-            <p><strong>Total Biaya:</strong> Rp{{ number_format($pesanan->total_biaya, 0, ',', '.') }}</p>
-            <a href="{{ route('customer.pesanan.bayar', $pesanan->id) }}"
-               class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
-               Bayar Sekarang
-            </a>
-            @endif
-
-            @if($pesanan->status_pesanan == 'Selesai')
-            <p><strong>Ulasan Anda:</strong> {{ $pesanan->review ?? 'Belum ada ulasan' }}</p>
-            @endif
-        </div>
+                                @if (!$existingReview)
+                                    <form action="{{ route('review.store', ['orderId' => $pesanan->id]) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="pesanan_id" value="{{ $pesanan->id }}">
+                                        <input type="number" name="rating" min="1" max="5"
+                                            class="w-16 text-center border border-gray-300 rounded" placeholder="★"
+                                            required>
+                                        <textarea name="komentar" rows="2" class="w-full border border-gray-300 rounded mt-2"
+                                            placeholder="Tambahkan komentar" required></textarea>
+                                        <button type="submit"
+                                            class="mt-2 px-4 py-2 bg-blue-500 text-white rounded">Kirim</button>
+                                    </form>
+                                @else
+                                    <div class="text-left">
+                                        <p class="text-yellow-500">Rating: {{ $existingReview->rating }} ★</p>
+                                        <p class="text-gray-700">Komentar: {{ $existingReview->comment }}</p>
+                                    </div>
+                                @endif
+                            @else
+                                <span class="text-gray-400">N/A</span>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
-    @endforeach
-</div>
 @endsection

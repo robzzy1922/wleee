@@ -41,9 +41,10 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        return redirect()->route('login')->with('status', 'Anda telah logout.');
+    
+        return redirect('/')->with('status', 'Anda telah logout.');
     }
+    
 
     // Tampilkan form register
     public function showRegisterForm()

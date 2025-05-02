@@ -31,12 +31,12 @@
     <!-- Navbar -->
     <nav class="bg-[#38E4D2] text-black p-4 shadow-md">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="/" class="text-xl font-bold">Techfix</a>
+            <a href="{{ route('home') }}"class="text-xl font-bold">Techfix</a>
             <ul class="flex space-x-6 items-center">
                 <li><a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-md font-semibold">Home</a></li>
-                <li><a href="#" class="px-4 py-2 rounded-md font-semibold">Kami Menjual</a></li>
+                {{-- <li><a href="#" class="px-4 py-2 rounded-md font-semibold">Kami Menjual</a></li>
                 <li><a href="{{ route('faq') }}" class="px-4 py-2 rounded-md font-semibold">FAQ</a></li>
-                <li><a href="#" class="px-4 py-2 rounded-md font-semibold">Kontak</a></li>
+                <li><a href="#" class="px-4 py-2 rounded-md font-semibold">Kontak</a></li> --}}
 
                 @auth
                 <!-- Notifikasi -->
@@ -72,7 +72,7 @@
                         </button>
                         <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg p-3">
                             <a href="{{ route('profile.edit') }}" class="block px-3 py-2 text-sm">Edit Profil</a>
-                            <a href="{{ route('customer.pesanan.detail', ['id' => Auth::user()->id]) }}" class="block px-3 py-2 text-sm">Pesanan Saya</a>
+                            <a href="{{ route('customer.pesanan.detail', ['id' => Auth::user()->id]) }}" class="block px-3 py-2 text-sm">Pesanan</a>
                             <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="block px-3 py-2 text-sm text-red-500">Logout</a>
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                                 @csrf
@@ -89,7 +89,7 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container mx-auto">
+    <div class="container mx-auto pb-5">
         @yield('content')
 
     </div>

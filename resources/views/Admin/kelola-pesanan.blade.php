@@ -15,6 +15,7 @@
 
         <!-- Main Content -->
         <div class="flex-1 ml-64 container mx-auto p-6" x-data="{ openDetail: false, selectedOrder: null }">
+
             <h1 class="text-2xl font-bold mb-4">Kelola Pesanan</h1>
 
             <!-- Filter -->
@@ -26,9 +27,11 @@
                     <div class="flex flex-col md:flex-row gap-2 w-full justify-end">
                         <select name="status" class="border px-4 py-2 rounded-lg w-full md:w-1/4">
                             <option value="">Semua Status</option>
-                            <option value="Menunggu Konfirmasi Admin" {{ request('status') == 'Menunggu Konfirmasi Admin' ? 'selected' : '' }}>Menunggu Konfirmasi
+                            <option value="Menunggu Konfirmasi Admin"
+                                {{ request('status') == 'Menunggu Konfirmasi Admin' ? 'selected' : '' }}>Menunggu Konfirmasi
                             </option>
-                            <option value="Diproses" {{ request('status') == 'Diproses' ? 'selected' : '' }}>Diproses</option>
+                            <option value="Diproses" {{ request('status') == 'Diproses' ? 'selected' : '' }}>Diproses
+                            </option>
                             <option value="Selesai" {{ request('status') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
                             <option value="Ditolak" {{ request('status') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
                         </select>

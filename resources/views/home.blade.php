@@ -30,14 +30,11 @@
                     Kami Menjual <span class="ml-1">▼</span>
                 </button>
                 <div id="dropdown-menu" class="absolute left-0 top-full mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded-lg hidden z-50">
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-200 flex items-center">
-                        <img src="icon-komputer.png" class="w-5 h-5 mr-2"> Komputer
+                    <a href="{{route('komputer')}}" class="block px-4 py-2 hover:bg-gray-200 flex items-center">
+                        <img src="{{ asset('images/image1.png')}}" class="w-5 h-5 mr-2">Perlengkapan Komputer
                     </a>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-200 flex items-center">
-                        <img src="icon-laptop.png" class="w-5 h-5 mr-2"> Laptop
-                    </a>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-200 flex items-center">
-                        <img src="icon-printer.png" class="w-5 h-5 mr-2"> Printer
+                    <a href="{{route('laptop')}}" class="block px-4 py-2 hover:bg-gray-200 flex items-center">
+                        <img src="{{ asset('images/image.png')}}" class="w-5 h-5 mr-2"> Laptop
                     </a>
                 </div>
             </div>
@@ -86,7 +83,7 @@
         <h2 class="text-2xl font-semibold text-center text-black">Testimoni Pelanggan</h2>
         <div class="flex flex-wrap justify-center gap-6 mt-6 max-w-5xl mx-auto">
             <div class="bg-[#B2EBF2] py-10 px-6">
-                <h2 class="text-2xl font-semibold text-center text-black">Testimoni Pelanggan</h2>
+                {{-- <h2 class="text-2xl font-semibold text-center text-black">Testimoni Pelanggan</h2> --}}
                 <div class="flex flex-wrap justify-center gap-6 mt-6 max-w-5xl mx-auto">
                     @forelse($reviews as $review)
                         <div class="bg-white p-6 rounded-lg shadow w-72 text-center border border-gray-300">

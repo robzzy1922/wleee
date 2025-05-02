@@ -24,6 +24,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // FAQ
 Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 
+// katalog
+Route::get('/komputer', [HomeController::class, 'KomputerCatalog'])->name('komputer');
+Route::get('/laptop', [HomeController::class, 'LaptopCatalog'])->name('laptop');
+
 // Login & Register
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -93,6 +97,13 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/admin/pembayaran', [PembayaranController::class, 'index'])->name('admin.pembayaran');
     Route::get('/admin/orders/all', [OrderController::class, 'index'])->name('admin.orders.all');
     Route::post('/admin/orders/status', [OrderController::class, 'updateStatus'])->name('admin.orders.status');
+
+    Route::get('/admin/edit-profile', [App\Http\Controllers\AdminController::class, 'editProfile'])
+     ->name('admin.editProfile');
+     Route::put('/admin/update-profile', [App\Http\Controllers\AdminController::class, 'updateProfile'])
+     ->name('admin.updateProfile');
+ 
+
     // File: routes/web.php
     Route::resource('customers', CustomerController::class);
 

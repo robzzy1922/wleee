@@ -17,4 +17,12 @@ class HomeController extends Controller
 
         return view('home', compact('reviews', 'testimonials'));
     }
+    public function KomputerCatalog()
+    {
+        return view('komputer');
+    }
+    public function LaptopCatalog()
+    {
+        return view('laptop');
+    }
 }
