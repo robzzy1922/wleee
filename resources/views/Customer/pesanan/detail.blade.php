@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mx-auto mt-10 p-8 bg-white rounded-lg shadow-lg max-w-7xl pb-10 ">
+<div class="container mx-auto mt-10 p-8 bg-white rounded-lg shadow-lg max-w-screen-2xl pb-10">
         <h2 class="text-3xl font-bold mb-8">Daftar Pesanan/Riwayat Pesanan</h2>
 
         <table class="table-auto w-full border-collapse border border-gray-300 pb-5">
@@ -12,6 +12,7 @@
                     <th class="border border-gray-300 px-6 py-3">Deskripsi Kerusakan</th>
                     <th class="border border-gray-300 px-6 py-3">Tanggal Pemesanan</th>
                     <th class="border border-gray-300 px-6 py-3 text-center">Status</th>
+                    <th class="border border-gray-300 px-6 py-3">Harga</th>
                     <th class="border border-gray-300 px-6 py-3 text-center">Rating</th>
 
                 </tr>
@@ -36,6 +37,7 @@
                                 {{ $pesanan->status }}
                             </span>
                         </td>
+                        <td class="border px-2 py-2 text-start">Rp {{ number_format($pesanan->harga, 0, ',', '.') }}</td>
                         <td class="border border-gray-300 px-6 py-3 text-center">
                             @if ($pesanan->status == 'Selesai')
                                 @php
