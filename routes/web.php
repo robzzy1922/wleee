@@ -27,6 +27,9 @@ Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 // katalog
 Route::get('/komputer', [HomeController::class, 'KomputerCatalog'])->name('komputer');
 Route::get('/laptop', [HomeController::class, 'LaptopCatalog'])->name('laptop');
+Route::get('/perlengkapan', [HomeController::class, 'perlengkapanCatalog'])->name('perlengkapan');
+Route::get('/laptop', [HomeController::class, 'LaptopCatalog'])->name('laptop');
+Route::get('/akse-laptop', [HomeController::class, 'perlengkapanLaptop'])->name('akse-laptop');
 
 // Login & Register
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -98,12 +101,17 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/admin/orders/all', [OrderController::class, 'index'])->name('admin.orders.all');
     Route::post('/admin/orders/status', [OrderController::class, 'updateStatus'])->name('admin.orders.status');
 
-    Route::get('/admin/edit-profile', [App\Http\Controllers\AdminController::class, 'editProfile'])
-     ->name('admin.editProfile');
-     Route::put('/admin/update-profile', [App\Http\Controllers\AdminController::class, 'updateProfile'])
-     ->name('admin.updateProfile');
+    Route::get('/kelola-catalog', [AdminController::class, 'kelolaCatalog'])->name('admin.catalog');
+    Route::get('/admin/tambah-catalog', [ AdminController::class, 'tambahCatalog'])->name('admin.tambahCatalog');
+    Route::post('/admin/store', [AdminController::class, 'store'])->name('catalog.store');
+    Route::get('/admin/edit-catalog/{id}', [AdminController::class, 'editCatalog'])->name('admin.editCatalog');
+    Route::put('/admin/update-catalog/{id}', [AdminController::class, 'updateCatalog'])->name('admin.updateCatalog');
+    Route::get('/admin/edit-profile', [AdminController::class, 'editProfile'])->name('admin.editProfile');
+    Route::put('/admin/update-profile', [AdminController::class, 'updateProfile'])->name('admin.updateProfile');
+    Route::delete('/admin/delete-catalog/{id}', [AdminController::class, 'deleteCatalog'])->name('admin.deleteCatalog');
  
-
+    Route::get('/admin/edit-harga/{id}', [AdminController::class, 'editHarga'])->name('admin.editHarga');
+    Route::put('/admin/update-harga/{id}', [AdminController::class, 'updateHarga'])->name('admin.updateHarga');
     // File: routes/web.php
     Route::resource('customers', CustomerController::class);
 

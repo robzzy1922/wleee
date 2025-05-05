@@ -59,32 +59,14 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <!-- Card 1 -->
                 <!-- Card 1 -->
-                <div class="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
-                    <img src="{{ asset('images/Laptop.jpg') }}" alt="PC" class="w-full h-40 object-cover">
-                    <div class="p-4 text-center">
-                        <p class="font-semibold text-sm">PC</p>
-                        <p class="text-blue-600 font-bold mt-1">Rp 5.000.000</p>
+                <a href="{{route('akse-laptop')}}">
+                    <div class="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+                        <img src="{{ asset('images/Laptop.jpg') }}" alt="PC" class="w-full h-40 object-cover">
+                        <div class="p-4 text-center">
+                            <p class="font-semibold text-sm">Laptop</p>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
-                    <img src="{{ asset('images/Handphone.jpg') }}" alt="SSD" class="w-full h-40 object-cover">
-                    <div class="p-4 text-center">
-                        <p class="font-semibold text-sm">Solid State Drive</p>
-                        <p class="text-blue-600 font-bold mt-1">Rp 1.200.000</p>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
-                    <img src="{{ asset('images/kulkas.jpg') }}" alt="Lainnya" class="w-full h-40 object-cover">
-                    <div class="p-4 text-center">
-                        <p class="font-semibold text-sm">Lainnya</p>
-                        <p class="text-blue-600 font-bold mt-1">Rp 3.500.000</p>
-                    </div>
-                </div>
-
+                </a>
             </div>
         </div>
 

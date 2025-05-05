@@ -12,10 +12,10 @@ class User extends Authenticatable
 {
     // app/Models/User.php
 
-public function pesanan()
-{
-    return $this->hasMany(Order::class, 'customer_id');
-}
+    public function pesanan()
+    {
+        return $this->hasMany(Order::class, 'customer_id');
+    }
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -54,9 +54,15 @@ public function pesanan()
         ];
     }
 
+    public function catalogs()
+    {
+        return $this->hasMany(Catalog::class);
+    }
+
+
     public function kelolaCustomer()
-{
-    $customers = User::where('role', 'customer')->get(); // asumsinya role disimpan
-    return view('admin.orders.status', compact('customers'));
-}
+    {
+        $customers = User::where('role', 'customer')->get(); // asumsinya role disimpan
+        return view('admin.orders.status', compact('customers'));
+    }
 }

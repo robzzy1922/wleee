@@ -17,9 +17,10 @@
             <nav>
                 <a href="{{ route('admin.dashboard') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Dashboard</a>
                 <a href="{{ route('admin.orders') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Data Pesanan</a>
+                <a href="{{ route('admin.catalog') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Data
+                    Katalog</a>
                 <a href="{{ route('admin.users') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Data Pengguna</a>
-                <a href="{{ route('admin.pembayaran') }}"
-                    class="block py-2 px-4 hover:bg-gray-700 rounded">Pembayaran</a>
+                {{-- <a href="{{ route('admin.pembayaran') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">Pembayaran</a> --}}
             </nav>
         </aside>
         <!-- Main Content -->
@@ -55,7 +56,8 @@
                     <!-- Dropdown Profile -->
                     <div class="relative">
                         <button @click="openDropdown = !openDropdown" class="flex items-center space-x-2">
-                            <img src="{{ Auth::user()->photo ? asset('storage/' . Auth::user()->photo) : '' }}"alt="Avatar" class="w-8 h-8 rounded-full">
+                            <img src="{{ Auth::user()->photo ? asset('storage/' . Auth::user()->photo) : '' }}"alt="Avatar"
+                                class="w-8 h-8 rounded-full">
                             <span>{{ Auth::user()->name }}</span>
                         </button>
 

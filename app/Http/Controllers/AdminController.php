@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Catalog;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Notification;
@@ -121,6 +122,103 @@ class AdminController extends Controller
 
         return view('admin.kelola-pesanan', compact('pesanans'));
     }
+    public function kelolaCatalog(Request $request)
+    {
+        $query = Catalog::query();
+
+        // Filter berdasarkan nama
+        if ($request->filled('search')) {
+            $query->where('nama_barang', 'like', '%' . $request->search . '%');
+        }
+
+        $catalog = $query->get(); // Mengambil koleksi catalog setelah filter
+
+        return view('admin.kelola-catalog', compact('catalog'));
+    }
+
+
+
+    public function tambahCatalog()
+    {
+        return view('admin.create-catalog');
+    }
+
+    public function editCatalog($id)
+    {
+        $catalog = Catalog::findOrFail($id);
+        return view('admin.edit-catalog', compact('catalog'));
+    }
+
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama_barang' => 'required|string|max:255',
+            'harga' => 'required|string|max:255',
+            'kategori' => 'required|string|max:255',
+            // 'link' => 'required|url',
+            'link' => 'required|string',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $gambarPath = null;
+        if ($request->hasFile('gambar')) {
+            $gambarPath = $request->file('gambar')->store('catalog', 'public');
+        }
+
+        Catalog::create([
+            'nama_barang' => $request->nama_barang,
+            'harga' => $request->harga,
+            'kategori' => $request->kategori,
+            'link' => $request->link,
+            'gambar' => $gambarPath,
+        ]);
+
+
+        return redirect()->route('admin.catalog')->with('success', 'Barang berhasil ditambahkan!');
+    }
+
+
+    public function updateCatalog(Request $request, $id)
+    {
+        $catalog = Catalog::findOrFail($id);
+
+        $validated = $request->validate([
+            'nama_barang' => 'required|string|max:255',
+            'harga' => 'required|numeric',
+            'kategori' => 'required|string|max:255',
+            'link' => 'required|url',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        if ($request->hasFile('gambar')) {
+            if ($catalog->gambar && Storage::disk('public')->exists($catalog->gambar)) {
+                Storage::disk('public')->delete($catalog->gambar);
+            }
+
+            $path = $request->file('gambar')->store('catalog', 'public');
+            $catalog->gambar = $path;
+        }
+
+        $catalog->nama_barang = $validated['nama_barang'];
+        $catalog->harga = $validated['harga'];
+        $catalog->kategori = $validated['kategori'];
+        $catalog->link = $validated['link'];
+
+        $catalog->save();
+
+        return redirect()->route('admin.catalog')->with('success', 'Data katalog berhasil diedit.');
+    }
+
+    public function deleteCatalog($id)
+    {
+        $catalog = Catalog::findOrFail($id); // Ganti dengan model yang sesuai
+        $catalog->delete();
+
+        return redirect()->route('admin.catalog')->with('success', 'Data katalog berhasil dihapus.');
+    }
+
+
 
     public function allOrders()
     {
@@ -134,6 +232,22 @@ class AdminController extends Controller
         $pesanan = Pesanan::with(['customer', 'progressTimeline'])->findOrFail($id);
         return view('admin.orders.detail', compact('pesanan'));
     }
+
+    public function editHarga($id)
+    {
+        $harga = Pesanan::findOrFail($id);
+        return view('admin.edit-harga', compact('harga'));
+    }
+
+    public function updateHarga(Request $request, $id)
+    {
+        $pesanan = Pesanan::findOrFail($id);
+        $pesanan->harga = $request->input('harga');
+        $pesanan->save();
+
+        return redirect()->route('admin.orders')->with('success', 'berhasil.');
+    }
+
 
     public function showPesanan($id)
     {
@@ -199,38 +313,38 @@ class AdminController extends Controller
 
 
     public function updateProfile(Request $request)
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-    // Validasi
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,' . $user->id,
-        'password' => 'nullable|confirmed|min:6',
-        'photo' => 'nullable|image|max:2048',
-    ]);
+        // Validasi
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|confirmed|min:6',
+            'photo' => 'nullable|image|max:2048',
+        ]);
 
-    // Update data
-    $user->name = $validated['name'];
-    $user->email = $validated['email'];
+        // Update data
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
 
-    if ($request->filled('password')) {
-        $user->password = Hash::make($validated['password']);
-    }
-
-    // Update foto jika ada
-    if ($request->hasFile('photo')) {
-        // Hapus foto lama jika ada
-        if ($user->photo && Storage::exists($user->photo)) {
-            Storage::delete($user->photo);
+        if ($request->filled('password')) {
+            $user->password = Hash::make($validated['password']);
         }
 
-        $path = $request->file('photo')->store('profile_photos', 'public');
-        $user->photo = $path;
+        // Update foto jika ada
+        if ($request->hasFile('photo')) {
+            // Hapus foto lama jika ada
+            if ($user->photo && Storage::exists($user->photo)) {
+                Storage::delete($user->photo);
+            }
+
+            $path = $request->file('photo')->store('profile_photos', 'public');
+            $user->photo = $path;
+        }
+
+        $user->save();
+
+        return redirect()->back()->with('success', 'Profil berhasil diperbarui.');
     }
-
-    $user->save();
-
-    return redirect()->back()->with('success', 'Profil berhasil diperbarui.');
-}
 }

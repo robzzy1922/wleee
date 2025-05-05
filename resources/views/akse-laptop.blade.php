@@ -32,12 +32,13 @@
                     class="text-black font-medium flex items-center">
                     Kami Menjual <span class="ml-1">▼</span>
                 </button>
-                <div id="dropdown-menu" class="absolute left-0 top-full mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded-lg hidden z-50">
-                    <a href="{{route('komputer')}}" class="block px-4 py-2 hover:bg-gray-200 flex items-center">
-                        <img src="{{ asset('images/image1.png')}}" class="w-5 h-5 mr-2">Perlengkapan Komputer
+                <div id="dropdown-menu"
+                    class="absolute left-0 top-full mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded-lg hidden z-50">
+                    <a href="{{ route('komputer') }}" class="block px-4 py-2 hover:bg-gray-200 flex items-center">
+                        <img src="{{ asset('images/image1.png') }}" class="w-5 h-5 mr-2">Perlengkapan Komputer
                     </a>
-                    <a href="{{route('laptop')}}" class="block px-4 py-2 hover:bg-gray-200 flex items-center">
-                        <img src="{{ asset('images/image.png')}}" class="w-5 h-5 mr-2"> Laptop
+                    <a href="{{ route('laptop') }}" class="block px-4 py-2 hover:bg-gray-200 flex items-center">
+                        <img src="{{ asset('images/image.png') }}" class="w-5 h-5 mr-2"> Laptop
                     </a>
                 </div>
             </div>
@@ -54,19 +55,25 @@
     <div class="container">
 
         <div class="px-4 py-6">
-            <h1 class="text-lg font-bold mb-4">Perlengkapan Komputer</h1>
+            <h1 class="text-lg font-bold mb-4">Laptop</h1>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+
                 <!-- Card 1 -->
-                <!-- Card 1 -->
-                <a href="{{route('perlengkapan')}}">
+                @foreach ($laptop as $item)
                     <div class="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
-                        <img src="{{ asset('images/Laptop.jpg') }}" alt="PC" class="w-full h-40 object-cover">
-                        <div class="p-4 text-center">
-                            <p class="font-semibold text-sm">PC</p>
+                        <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->nama_barang }}"
+                            class="w-full h-40 object-cover">
+                        <div class="p-4">
+                            <h3 class="font-semibold text-lg mb-2">{{ $item->nama_barang }}</h3>
+                            <p class="text-gray-700 mb-2">Rp {{ number_format($item->harga, 0, ',', '.') }}</p>
+                            <a href="{{ $item->link }}" target="_blank"
+                                class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+                                Beli / Kunjungi
+                            </a>
                         </div>
                     </div>
-                </a>
+                @endforeach
 
             </div>
         </div>

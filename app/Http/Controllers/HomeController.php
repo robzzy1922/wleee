@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Review;
+use App\Models\Catalog;
 
 class HomeController extends Controller
 {
@@ -25,4 +26,22 @@ class HomeController extends Controller
     {
         return view('laptop');
     }
+    public function perlengkapanCatalog(Request $request)
+    {
+        $query = Catalog::query();
+        $query->where('kategori', 'perlengkapan');
+        $perlengkapan = $query->get(); 
+        return view('perlengkapan', compact('perlengkapan'));
+    }
+    
+    public function perlengkapanLaptop(Request $request)
+    {
+        $query = Catalog::query();
+        $query->where('kategori', 'laptop');
+        $laptop = $query->get(); 
+        return view('akse-laptop', compact('laptop'));
+    }
+    
+    
+
 }
