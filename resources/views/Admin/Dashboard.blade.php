@@ -83,23 +83,19 @@
                 <h2 class="text-2xl font-bold mb-4">Dashboard Admin</h2>
 
                 <div class="grid grid-cols-4 gap-4 mb-6">
-                    <a href="{{ route('admin.orders.all') }}"
-                        class="bg-white p-5 rounded-lg shadow text-center block hover:bg-gray-100">
+                    <a class="bg-white p-5 rounded-lg shadow text-center block hover:bg-gray-100">
                         <h3 class="text-lg font-semibold text-gray-700">Total Pesanan</h3>
                         <p class="text-2xl font-bold text-gray-800">{{ $total }}</p>
                     </a>
-                    <a href="{{ route('admin.orders.status', 'completed') }}"
-                        class="bg-white p-5 rounded-lg shadow text-center block hover:bg-gray-100">
+                    <a class="bg-white p-5 rounded-lg shadow text-center block hover:bg-gray-100">
                         <h3 class="text-lg font-semibold text-gray-700">Selesai</h3>
                         <p class="text-2xl font-bold text-gray-800">{{ $completed }}</p>
                     </a>
-                    <a href="{{ route('admin.orders.status', 'pending') }}"
-                        class="bg-white p-5 rounded-lg shadow text-center block hover:bg-gray-100">
+                    <a class="bg-white p-5 rounded-lg shadow text-center block hover:bg-gray-100">
                         <h3 class="text-lg font-semibold text-gray-700">Menunggu Konfirmasi</h3>
                         <p class="text-2xl font-bold text-gray-800">{{ $pending }}</p>
                     </a>
-                    <a href="{{ route('admin.orders.status', 'rejected') }}"
-                        class="bg-white p-5 rounded-lg shadow text-center block hover:bg-gray-100">
+                    <a class="bg-white p-5 rounded-lg shadow text-center block hover:bg-gray-100">
                         <h3 class="text-lg font-semibold text-gray-700">Ditolak</h3>
                         <p class="text-2xl font-bold text-gray-800">{{ $rejected }}</p>
                     </a>
