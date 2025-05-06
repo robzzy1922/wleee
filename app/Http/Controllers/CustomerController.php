@@ -31,19 +31,31 @@ class CustomerController extends Controller
             'jenis_barang'  => 'required|string|max:100',
             'keluhan'       => 'nullable|string',
         ]);
-
-        $data['user_id']            = Auth::id();
-        $data['customer_id']        = Auth::id(); // Ensure customer_id is set
+    
+        $userId = Auth::id();
+        
+        $data['user_id']            = $userId;
+        $data['customer_id']        = $userId; // pastikan kolom ini memang ada di tabel
         $data['tanggal_pemesanan']  = now();
         $data['status']             = 'Menunggu Konfirmasi Admin';
         $data['harga']              = null;
         $data['estimasi']           = null;
-
+    
         $pesanan = Pesanan::create($data);
-
+    
+        // Buat notifikasi
+        \App\Models\Notification::create([
+            'user_id'      => $userId,
+            'title'        => 'Pesanan Berhasil Dibuat',
+            'message'      => 'Pesanan untuk ' . $pesanan->jenis_barang . ' telah berhasil dibuat dan menunggu konfirmasi admin.',
+            'is_read'      => false,
+            'target_role'  => 'admin', 
+        ]);
+    
         return redirect()->route('customer.pesanan.detail', $pesanan->id)
             ->with('success', 'Pesanan berhasil dibuat!');
     }
+    
 
     /**
      * List all pesanan for tracking

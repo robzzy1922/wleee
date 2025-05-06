@@ -68,6 +68,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/dashboard/pesanan', [CustomerController::class, 'storePesanan'])->name('customer.pesanan.store');
     Route::get('/pesanan/create', [CustomerController::class, 'createPesanan'])->name('pesanan.create');
 
+   
+    Route::patch('/notifications/{id}/read', [NotifikasiController::class, 'markAsRead'])->name('notifications.read');
+    Route::patch('/notifications/read-all', [NotifikasiController::class, 'markAllAsRead'])->name('notifications.readAll');
+
+    
     // Riwayat Servis
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/riwayat', [CustomerController::class, 'riwayatServis'])->name('riwayat.servis');

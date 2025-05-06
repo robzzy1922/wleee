@@ -27,24 +27,51 @@
         <div class="flex-1 flex flex-col">
             <!-- Navbar -->
             <header class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-                {{-- <input type="text" placeholder="Cari pelanggan..." class="border px-4 py-2 rounded-lg w-1/3"> --}}
                 <div class="flex items-center space-x-4 ml-auto">
                     <!-- Notifikasi -->
                     <div class="relative">
+                        @php
+                            $customerNotifications = $notifications->where('target_role', 'admin');
+                            $unreadCount = $customerNotifications->where('is_read', false)->count();
+                            $sortedNotifications = $customerNotifications->sortByDesc('created_at');
+                        @endphp
+                    
                         <button @click="showNotif = !showNotif" class="relative">
                             🔔
-                            @if (isset($notifications) && count($notifications) > 0)
-                                <span
-                                    class="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">{{ count($notifications) }}</span>
+                            @if ($unreadCount > 0)
+                                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                    {{ $unreadCount }}
+                                </span>
                             @endif
                         </button>
-                        <div x-show="showNotif" @click.away="showNotif = false"
-                            class="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg p-4">
-                            <div class="notifications space-y-2">
-                                @forelse ($notifications as $notif)
+                    
+                        <div x-show="showNotif" @click.away="showNotif = false" class="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg p-4 z-50">
+                            <p class="font-bold border-b mb-2 pb-1">Notifikasi</p>
+                    
+                            @if ($unreadCount > 0)
+                                <form action="{{ route('notifications.readAll') }}" method="POST" class="mb-2">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="text-sm text-blue-500">Baca Semua</button>
+                                </form>
+                            @endif
+                    
+                            <div class="notifications space-y-2 max-h-64 overflow-y-auto">
+                                @forelse ($sortedNotifications as $notif)
                                     <div class="notification border-b pb-2">
-                                        <strong>{{ $notif->title }}</strong>
+                                        <strong class="text-blue-600">{{ $notif->title }}</strong>
                                         <p class="text-sm text-gray-700">{{ $notif->message }}</p>
+                                        <small class="text-gray-500">{{ $notif->created_at->diffForHumans() }}</small>
+                    
+                                        @if (!$notif->is_read)
+                                            <form action="{{ route('notifications.read', $notif->id) }}" method="POST" class="mt-1">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="text-sm text-blue-500">Mark as Read</button>
+                                            </form>
+                                        @else
+                                            <span class="text-sm text-green-500 mt-1">Read</span>
+                                        @endif
                                     </div>
                                 @empty
                                     <p class="text-sm text-gray-500">Tidak ada notifikasi.</p>
@@ -52,6 +79,8 @@
                             </div>
                         </div>
                     </div>
+                    
+                    
 
                     <!-- Dropdown Profile -->
                     <div class="relative">

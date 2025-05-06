@@ -40,30 +40,58 @@
 
                 @auth
                 <!-- Notifikasi -->
-                <li x-data="{ open: false }" class="relative">
-                    <button @click="open = !open; markAsRead()" class="relative px-4 py-2 rounded-md font-semibold">
+                <li class="relative list-none">
+                    @php
+                        $userNotifications = $notifications->where('target_role', 'customer');
+                        $unreadCount = $userNotifications->where('is_read', false)->count();
+                        $userNotifications = $userNotifications->sortByDesc('created_at'); // Notifikasi terbaru di atas
+                    @endphp
+                
+                    <button class="relative px-4 py-2 rounded-md font-semibold" onclick="document.getElementById('notif-dropdown').classList.toggle('hidden')">
                         🔔
-                        @if($notifCount > 0)
-                            <span class="absolute top-0 right-0 bg-red-500 text-white text-xs px-2 rounded-full">{{ $notifCount }}</span>
+                        @if ($unreadCount > 0)
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                {{ $unreadCount }}
+                            </span>
                         @endif
                     </button>
-                    <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg p-3 z-50">
+                
+                    <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg p-4 z-50">
                         <p class="font-bold border-b mb-2 pb-1">Notifikasi</p>
-                        @if($notifCount > 0)
-                            <ul>
-                                @foreach ($notifs as $n)
-                                    <li class="text-sm border-b py-2">
-                                        📌 Status pesanan jadi <strong>{{ $n->status }}</strong>
-                                        <br>
-                                        <small class="text-gray-500">{{ $n->updated_at->diffForHumans() }}</small>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @else
-                            <p class="text-sm text-gray-500">Tidak ada notifikasi baru.</p>
+                
+                        @if ($unreadCount > 0)
+                            <form action="{{ route('notifications.readAll') }}" method="POST" class="mb-2">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="text-sm text-blue-500">Baca Semua</button>
+                            </form>
                         @endif
+                
+                        <ul class="space-y-2 max-h-64 overflow-y-auto">
+                            @forelse ($userNotifications as $notif)
+                                <li class="border-b pb-2">
+                                    <strong class="text-blue-600">{{ $notif->title }}</strong>
+                                    <p class="text-sm text-gray-700">{{ $notif->message }}</p>
+                                    <small class="text-gray-500">{{ $notif->updated_at->diffForHumans() }}</small>
+                
+                                    @if (!$notif->is_read)
+                                        <form action="{{ route('notifications.read', $notif->id) }}" method="POST" class="mt-1">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="text-sm text-blue-500">Mark as Read</button>
+                                        </form>
+                                    @else
+                                        <span class="text-sm text-green-500 mt-1">Read</span>
+                                    @endif
+                                </li>
+                            @empty
+                                <li class="text-sm text-gray-500">Tidak ada notifikasi.</li>
+                            @endforelse
+                        </ul>
                     </div>
                 </li>
+                
+                                   
                     <!-- Dropdown Profil -->
                     <li x-data="{ open: false }" class="relative">
                         <button @click="open = !open" class="flex items-center space-x-2 px-4 py-2 rounded-md font-semibold">
@@ -101,16 +129,55 @@
         </div>
     </footer>
     <script>
-        function markAsRead() {
-            fetch("{{ route('notif.read') }}", {
-                method: "POST",
+        function markAsRead(notifId) {
+            fetch(`/notifications/${notifId}/read`, {
+                method: 'PATCH',
                 headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                    "Accept": "application/json"
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                body: JSON.stringify({ is_read: true }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update jumlah notifikasi yang belum dibaca
+                    unreadCount -= 1;
+                    if (unreadCount <= 0) {
+                        unreadCount = 0;
+                        // Jika tidak ada notifikasi yang belum dibaca, sembunyikan badge
+                        document.querySelector('.badge').style.display = 'none';
+                    }
+                } else {
+                    alert('Terjadi kesalahan!');
                 }
-            });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        function markAllAsRead() {
+            fetch('/notifications/read-all', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    unreadCount = 0;
+                    // Menyembunyikan badge jika tidak ada lagi notifikasi yang belum dibaca
+                    document.querySelector('.badge').style.display = 'none';
+                } else {
+                    alert('Terjadi kesalahan!');
+                }
+            })
+            .catch(error => console.error('Error:', error));
         }
     </script>
+    
+    
 </body>
 </html>
 

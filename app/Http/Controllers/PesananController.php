@@ -23,8 +23,9 @@ class PesananController extends Controller
             'jenis_barang' => 'required|string|max:100',
             'keluhan' => 'nullable|string',
         ]);
-
-        Pesanan::create([
+    
+        // Buat pesanan baru
+        $pesanan = Pesanan::create([
             'user_id' => Auth::id(),
             'nama' => $request->nama,
             'alamat' => $request->alamat,
@@ -36,18 +37,36 @@ class PesananController extends Controller
             'harga' => null,
             'estimasi' => null,
         ]);
-
+    
+        // Tambahkan notifikasi untuk user
+        Notification::create([
+            'user_id' => Auth::id(),
+            'title' => 'Pesanan Baru Dibuat',
+            'message' => 'Pesanan Anda untuk ' . $pesanan->jenis_barang . ' telah berhasil dibuat dan sedang menunggu konfirmasi admin.',
+        ]);
+    
         return redirect()->route('customer.pesanan.show', $pesanan->id)->with('success', 'Pesanan berhasil dibuat!');
     }
+    
 
     public function updateStatus(Request $request, $id)
     {
         $pesanan = Pesanan::findOrFail($id);
         $pesanan->status = $request->input('status');
         $pesanan->save();
-
-        return redirect('http://127.0.0.1:8000/admin/kelola-pesanan')->with('success', 'Status updated successfully');
+    
+        // Tambahkan notifikasi ke admin dengan target_role = 'admin'
+        \App\Models\Notification::create([
+            'user_id'   => $pesanan->user_id, // pastikan relasi ini ada di model
+            'title'     => 'Status Pesanan Diperbarui',
+            'message'   => 'Status pesanan Anda telah diubah menjadi: ' . $pesanan->status,
+            'target_role' => 'customer', // Target role admin
+            'is_read'   => false, // Notifikasi belum dibaca
+        ]);
+    
+        return redirect()->route('admin.orders')->with('success', 'Status updated successfully');
     }
+    
 
     public function show($id)
     {
@@ -55,6 +74,4 @@ class PesananController extends Controller
 
         return view('customer.pesanan.detail', compact('pesanan'));
     }
-
-   
 }
