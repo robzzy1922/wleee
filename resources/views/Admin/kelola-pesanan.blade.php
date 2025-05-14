@@ -33,6 +33,7 @@
                             </option>
                             <option value="Diproses" {{ request('status') == 'Diproses' ? 'selected' : '' }}>Diproses
                             </option>
+                            <option value="Selesai Diservice" {{ request('status') == 'Selesai Diservice' ? 'selected' : '' }}>Selesai Diservice</option>
                             <option value="Selesai" {{ request('status') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
                             <option value="Ditolak" {{ request('status') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
                         </select>
@@ -84,6 +85,8 @@
                                                 Diproses</option>
                                             <option value="Selesai" {{ $pesanan->status == 'Selesai' ? 'selected' : '' }}>
                                                 Selesai</option>
+                                            <option value="Selesai Diservice" {{ $pesanan->status == 'Selesai Diservice' ? 'selected' : '' }}>
+                                                Selesai Diservice</option>
                                             <option value="Ditolak" {{ $pesanan->status == 'Ditolak' ? 'selected' : '' }}>
                                                 Ditolak</option>
                                         </select>

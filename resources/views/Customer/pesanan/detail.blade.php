@@ -41,14 +41,17 @@
                             Rp {{ number_format($pesanan->harga, 0, ',', '.') }}
 
                             @if (!is_null($pesanan->harga))
-                                <form action="" method="POST" class="mt-2">
-                                    @csrf
-                                    <button type="submit"
-                                        class="bg-green-500 text-white text-sm px-3 py-1 rounded hover:bg-green-600">
-                                        Bayar Sekarang
-                                    </button>
-                                </form>
-                            @endif
+    <form action="{{ route('midtrans.create') }}" method="POST" class="mt-2 snap-form">
+        @csrf
+        <input type="hidden" name="pesanan_id" value="{{ $pesanan->id }}">
+        <input type="hidden" name="nama" value="{{ $pesanan->nama }}">
+        <input type="hidden" name="harga" value="{{ $pesanan->harga }}">
+        <button type="submit"
+            class="bg-green-500 text-white text-sm px-3 py-1 rounded hover:bg-green-600">
+            Bayar Sekarang
+        </button>
+    </form>
+@endif
                         </td>
                         <td class="border border-gray-300 px-6 py-3 text-center">
                             @if ($pesanan->status == 'Selesai')

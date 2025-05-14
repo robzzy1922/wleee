@@ -16,10 +16,20 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
 // Halaman utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+
+
+// Buat transaksi & ambil Snap Token
+Route::post('/midtrans/create', [MidtransController::class, 'createTransaction'])->name('midtrans.create');
+
+// Callback dari Midtrans (harus POST dan tidak perlu nama route, biasanya sistem Midtrans tidak pakai nama route)
+Route::post('/midtrans/callback', [MidtransController::class, 'callback']);
+
 
 // FAQ
 Route::get('/faq', [FaqController::class, 'index'])->name('faq');
@@ -68,11 +78,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/dashboard/pesanan', [CustomerController::class, 'storePesanan'])->name('customer.pesanan.store');
     Route::get('/pesanan/create', [CustomerController::class, 'createPesanan'])->name('pesanan.create');
 
-   
+
     Route::patch('/notifications/{id}/read', [NotifikasiController::class, 'markAsRead'])->name('notifications.read');
     Route::patch('/notifications/read-all', [NotifikasiController::class, 'markAllAsRead'])->name('notifications.readAll');
 
-    
+
     // Riwayat Servis
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/riwayat', [CustomerController::class, 'riwayatServis'])->name('riwayat.servis');
@@ -114,7 +124,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/admin/edit-profile', [AdminController::class, 'editProfile'])->name('admin.editProfile');
     Route::put('/admin/update-profile', [AdminController::class, 'updateProfile'])->name('admin.updateProfile');
     Route::delete('/admin/delete-catalog/{id}', [AdminController::class, 'deleteCatalog'])->name('admin.deleteCatalog');
- 
+
     Route::get('/admin/edit-harga/{id}', [AdminController::class, 'editHarga'])->name('admin.editHarga');
     Route::put('/admin/update-harga/{id}', [AdminController::class, 'updateHarga'])->name('admin.updateHarga');
     // File: routes/web.php

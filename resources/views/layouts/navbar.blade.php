@@ -10,7 +10,7 @@
     <!-- Profile & Notifications -->
     <div class="flex items-center space-x-4">
         <!-- Notifikasi -->
-        <button class="relative">
+        <button class="relative">   
             🔔
             <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">3</span>
         </button>
