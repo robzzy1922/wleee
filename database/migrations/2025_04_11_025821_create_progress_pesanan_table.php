@@ -10,22 +10,24 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up()
-{
-    Schema::create('progress_pesanan', function (Blueprint $table) {
-        $table->id();
-        $table->unsignedBigInteger('pesanan_id');
-        $table->string('status')->nullable();
-        $table->timestamps();
-
-        $table->foreign('pesanan_id')->references('id')->on('pesanan')->onDelete('cascade');
-    });
-}
+    {
+        Schema::create('pesanan', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('nama_pelanggan');
+            $table->string('jenis_pesanan');
+            $table->text('deskripsi')->nullable();
+            $table->decimal('total_harga', 10, 2);
+            $table->string('status')->default('pending');
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('progress_pesanan');
+        Schema::dropIfExists('pesanan');
     }
 };

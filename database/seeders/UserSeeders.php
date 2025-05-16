@@ -2,18 +2,18 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds;
 use Illuminate\Database\Seeder;
-use App\Models\User;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Hash;
 
-class UserSeeder extends Seeder
+class UserSeeders extends Seeder
 {
     /**
      * Run the database seeds.
      */
-    public function run()
+    public function run(): void
     {
+        // Admin user
         User::create([
             'name' => 'Admin Techfix',
             'email' => 'admin@techfix.com',
@@ -21,6 +21,7 @@ class UserSeeder extends Seeder
             'role' => 'admin',
         ]);
 
+        // Regular user
         User::create([
             'name' => 'Pengguna Biasa',
             'email' => 'user@techfix.com',
@@ -29,4 +30,3 @@ class UserSeeder extends Seeder
         ]);
     }
 }
-
