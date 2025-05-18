@@ -41,14 +41,6 @@
                             <td class="px-4 py-2 border space-x-2">
                                 <a href="{{ route('customer.pesanan.detail', $pesanan->id) }}"
                                    class="text-blue-600 hover:underline font-medium">Detail</a>
-                                @if($pesanan->status == 'Menunggu Pembayaran')
-                                    <a href="{{ route('customer.pesanan.bayar', $pesanan->id) }}"
-                                       class="text-green-600 hover:underline font-medium">Bayar</a>
-                                @endif
-                                @if($pesanan->status == 'Selesai' && !$pesanan->review)
-                                    <a href="{{ route('customer.pesanan.review', $pesanan->id) }}"
-                                    class="text-indigo-600 hover:underline font-medium">Ulasan</a>
-                                @endif
                             </td>
                         </tr>
                         @endforeach

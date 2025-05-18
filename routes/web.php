@@ -25,10 +25,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 
 // Buat transaksi & ambil Snap Token
-Route::post('/midtrans/create', [MidtransController::class, 'createTransaction'])->name('midtrans.create');
+Route::post('/midtrans/create', [MidtransController::class, 'create'])->name('midtrans.create');
 
 // Callback dari Midtrans (harus POST dan tidak perlu nama route, biasanya sistem Midtrans tidak pakai nama route)
-Route::post('/midtrans/callback', [MidtransController::class, 'callback']);
+Route::post('/midtrans/callback', [MidtransController::class, 'callback'])->name('midtrans.callback');
 
 
 // FAQ

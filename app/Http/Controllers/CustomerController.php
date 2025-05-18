@@ -31,31 +31,31 @@ class CustomerController extends Controller
             'jenis_barang'  => 'required|string|max:100',
             'keluhan'       => 'nullable|string',
         ]);
-    
+
         $userId = Auth::id();
-        
+
         $data['user_id']            = $userId;
         $data['customer_id']        = $userId; // pastikan kolom ini memang ada di tabel
         $data['tanggal_pemesanan']  = now();
         $data['status']             = 'Menunggu Konfirmasi Admin';
         $data['harga']              = null;
         $data['estimasi']           = null;
-    
+
         $pesanan = Pesanan::create($data);
-    
+
         // Buat notifikasi
         \App\Models\Notification::create([
             'user_id'      => $userId,
             'title'        => 'Pesanan Berhasil Dibuat',
             'message'      => 'Pesanan untuk ' . $pesanan->jenis_barang . ' telah berhasil dibuat dan menunggu konfirmasi admin.',
             'is_read'      => false,
-            'target_role'  => 'admin', 
+            'target_role'  => 'admin',
         ]);
-    
-        return redirect()->route('customer.pesanan.detail', $pesanan->id)
+
+        return redirect()->route('customer.pesanan.index', $pesanan->id)
             ->with('success', 'Pesanan berhasil dibuat!');
     }
-    
+
 
     /**
      * List all pesanan for tracking
@@ -132,10 +132,10 @@ class CustomerController extends Controller
         $pesanan = Pesanan::where('user_id', Auth::id())
             ->with(['payment', 'progress', 'review'])
             ->findOrFail($id);
-    
+
         // Ambil semua pesanan milik user yang sedang login
         $pesanans = Pesanan::where('user_id', Auth::id())->get();
-    
+
         // Kirim data ke view
         return view('Customer.pesanan.detail', compact('pesanan', 'pesanans'));
     }
@@ -143,7 +143,6 @@ class CustomerController extends Controller
     public function pesananIndex()
     {
         $pesanans = Pesanan::where('customer_id', Auth::id())
-            ->whereNotIn('status', ['Selesai', 'Dibatalkan'])
             ->orderBy('created_at', 'desc')
             ->get();
         return view('customer.pesanan.index', compact('pesanans'));
@@ -151,9 +150,8 @@ class CustomerController extends Controller
 
     public function riwayat()
     {
-        // ambil data pesanan riwayat
-        $pesanans = Pesanan::where('customer_id', auth()->id())
-            ->whereIn('status', ['Selesai', 'Dibatalkan'])
+        $pesanans = Pesanan::where('customer_id', Auth::id())
+            ->whereIn('status', ['Selesai', 'Dibatalkan', 'Ditolak'])
             ->orderBy('created_at', 'desc')
             ->get();
 
