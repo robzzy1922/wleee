@@ -13,10 +13,16 @@ class MidtransController extends Controller
 {
     public function create(Request $request)
     {
-        // Validasi pesanan_id
-        $request->validate([
-            'pesanan_id' => 'required|exists:pesanans,id',
-        ]);
+        try {
+            $request->validate([
+                'pesanan_id' => 'required|exists:pesanans,id',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => 'ID pesanan tidak valid.'], 422);
+            }
+            throw $e;
+        }
 
         $pesanan = Pesanan::findOrFail($request->pesanan_id);
 
@@ -43,6 +49,9 @@ class MidtransController extends Controller
             $snapToken = Snap::getSnapToken($params);
         } catch (\Exception $e) {
             Log::error('Midtrans Snap Error: ' . $e->getMessage());
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => 'Gagal mendapatkan token pembayaran. Silakan coba lagi.'], 500);
+            }
             return back()->with('error', 'Gagal mendapatkan token pembayaran. Silakan coba lagi.');
         }
 
@@ -84,5 +93,14 @@ class MidtransController extends Controller
         }
 
         return response()->json(['status' => 'ok']);
+    }
+
+    public function getSnapToken($pesanan_id)
+    {
+        $pesanan = Pesanan::find($pesanan_id);
+        if (!$pesanan || !$pesanan->midtrans_snap_token) {
+            return response()->json(['error' => 'Snap token tidak ditemukan.'], 404);
+        }
+        return response()->json(['snapToken' => $pesanan->midtrans_snap_token]);
     }
 }

@@ -99,14 +99,7 @@
             payBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 const pesananId = payBtn.getAttribute('data-pesanan-id');
-                fetch("{{ route('midtrans.create') }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    },
-                    body: JSON.stringify({ pesanan_id: pesananId })
-                })
+                fetch(`/midtrans/token/${pesananId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.snapToken) {
@@ -124,7 +117,7 @@
                             }
                         });
                     } else {
-                        alert("Gagal mendapatkan token pembayaran.");
+                        alert(data.error || "Gagal mendapatkan token pembayaran.");
                     }
                 })
                 .catch(() => alert("Terjadi kesalahan, coba lagi."));

@@ -169,3 +169,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/review/{orderId}/create', [ReviewController::class, 'create'])->name('review.create');
     Route::post('/review/{orderId}', [ReviewController::class, 'store'])->name('review.store');
 });
+
+Route::get('/midtrans/token/{pesanan_id}', [MidtransController::class, 'getSnapToken'])->name('midtrans.getToken');
