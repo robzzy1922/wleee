@@ -143,8 +143,10 @@ class CustomerController extends Controller
     public function pesananIndex()
     {
         $pesanans = Pesanan::where('customer_id', Auth::id())
+            ->with(['user', 'payment']) // eager load relations if needed
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10); // add pagination for better performance
+
         return view('customer.pesanan.index', compact('pesanans'));
     }
 

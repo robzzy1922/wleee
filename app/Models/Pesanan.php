@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
+use App\Models\Review;
 use App\Models\Layanan;
 use App\Models\Payment;
 use App\Models\ProgressPesanan;
-use App\Models\Review;
+use Illuminate\Foundation\Auth\User;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Pesanan extends Model
 {
@@ -29,6 +29,8 @@ class Pesanan extends Model
         'status',
         'harga',
         'estimasi',
+        'midtrans_order_id',
+        'midtrans_snap_token',
     ];
 
     // Relasi ke User
