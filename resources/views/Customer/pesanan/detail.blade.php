@@ -34,6 +34,7 @@
                 <td class="px-4 py-3 border">
                     Rp {{ number_format($pesanan->harga, 0, ',', '.') }}
                     @if($pesanan->status === 'Selesai')
+
                     <button id="pay-button"
                         class="ml-4 bg-green-500 text-white text-sm px-4 py-2 rounded hover:bg-green-600 transition">
                         Bayar Sekarang
@@ -43,34 +44,42 @@
             </tr>
         </table>
     </div>
+
+    @if($pesanan->status === 'Selesai' && !$pesanan->payment)
+    <!-- Midtrans Snap -->
+    <script type="text/javascript"
+        src="{{ config('midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
+        data-client-key="{{ config('midtrans.client_key') }}">
+    </script>
+
+    @if(isset($snapToken))
+    <div class="mt-6 text-center">
+        <button id="pay-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+            Bayar Sekarang
+        </button>
+    </div>
+
+    <script type="text/javascript">
+        document.getElementById('pay-button').onclick = function() {
+                    snap.pay('{{ $snapToken }}', {
+                        onSuccess: function(result) {
+                            window.location.href = '{{ route("customer.pembayaran") }}';
+                        },
+                        onPending: function(result) {
+                            alert('Pembayaran dalam proses!');
+                            window.location.reload();
+                        },
+                        onError: function(result) {
+                            alert('Pembayaran gagal!');
+                            console.log(result);
+                        },
+                        onClose: function() {
+                            alert('Anda menutup popup tanpa menyelesaikan pembayaran');
+                        }
+                    });
+                };
+    </script>
+    @endif
+    @endif
 </div>
-
-@if($pesanan->status === 'Selesai')
-<!-- Load Midtrans SDK -->
-<script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
-    data-client-key="{{ config('midtrans.client_key') }}">
-</script>
-
-<script type="text/javascript">
-    document.getElementById('pay-button').addEventListener('click', function() {
-            snap.pay('{{ $pesanan->midtrans_snap_token }}', {
-                onSuccess: function(result) {
-                    alert('Pembayaran berhasil!');
-                    window.location.href = '{{ route("customer.pesanan.index") }}';
-                },
-                onPending: function(result) {
-                    alert('Pembayaran dalam proses!');
-                    window.location.reload();
-                },
-                onError: function(result) {
-                    alert('Pembayaran gagal!');
-                    console.log(result);
-                },
-                onClose: function() {
-                    alert('Anda menutup popup tanpa menyelesaikan pembayaran');
-                }
-            });
-        });
-</script>
-@endif
 @endsection

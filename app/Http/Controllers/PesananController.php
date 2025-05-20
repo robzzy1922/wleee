@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Midtrans\Snap;
+use Midtrans\Config;
 use App\Models\Pesanan;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Midtrans\Snap;
-use Midtrans\Config;
+use App\Services\Payments\BasePayment;
+use App\Services\Payments\MidtransPaymentDecorator;
 
 
 class PesananController extends Controller
@@ -75,63 +77,83 @@ class PesananController extends Controller
 
 
     public function updateStatus(Request $request, $id)
-    {
-        $pesanan = Pesanan::findOrFail($id);
-        $pesanan->status = $request->input('status');
-        $pesanan->save();
+{
+    $pesanan = Pesanan::findOrFail($id);
+    $newStatus = $request->input('status');
+    $pesanan->status = $newStatus;
+    $pesanan->save();
 
-        // Tambahkan notifikasi ke admin dengan target_role = 'admin'
-        \App\Models\Notification::create([
-            'user_id'   => $pesanan->user_id, // pastikan relasi ini ada di model
-            'title'     => 'Status Pesanan Diperbarui',
-            'message'   => 'Status pesanan Anda telah diubah menjadi: ' . $pesanan->status,
-            'target_role' => 'customer', // Target role admin
-            'is_read'   => false, // Notifikasi belum dibaca
-        ]);
+    // Jika statusnya "Selesai", maka generate Snap Token Midtrans
+    if ($newStatus === 'Selesai') {
+        // Konfigurasi Midtrans
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = false;
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
 
-        return redirect()->route('admin.orders')->with('success', 'Status updated successfully');
+        $params = [
+            'transaction_details' => [
+                'order_id' => 'ORDER-' . $pesanan->id . '-' . time(),
+                'gross_amount' => $pesanan->harga,
+            ],
+            'customer_details' => [
+                'first_name' => $pesanan->nama,
+
+            ],
+        ];
+
+        try {
+            $snapToken = Snap::getSnapToken($params);
+            $pesanan->update([
+                'midtrans_order_id' => $params['transaction_details']['order_id'],
+                'midtrans_snap_token' => $snapToken
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal membuat Snap Token: ' . $e->getMessage());
+        }
     }
 
+    // Tambahkan notifikasi
+    Notification::create([
+        'user_id'     => $pesanan->user_id,
+        'title'       => 'Status Pesanan Diperbarui',
+        'message'     => 'Status pesanan Anda telah diubah menjadi: ' . $newStatus,
+        'target_role' => 'customer',
+        'is_read'     => false,
+    ]);
 
-    public function show($id)
+    return redirect()->route('admin.orders')->with('success', 'Status updated successfully');
+}
+
+public function show($id)
     {
         $pesanan = Pesanan::findOrFail($id);
+        $snapToken = null;
 
-        // Generate snap token if status is waiting for payment
-        if ($pesanan->status === 'Selesai') {
-            // Set Midtrans configuration
-            Config::$serverKey = config('midtrans.server_key');
-            Config::$isProduction = false;
-            Config::$isSanitized = true;
-            Config::$is3ds = true;
-
-            $params = [
-                'transaction_details' => [
-                    'order_id' => 'ORDER-' . $pesanan->id . '-' . time(),
-                    'gross_amount' => $pesanan->harga,
-                ],
-                'customer_details' => [
-                    'first_name' => $pesanan->nama,
-                    'phone' => $pesanan->telepon,
-                    'address' => $pesanan->alamat,
-                ],
-            ];
-
+        if ($pesanan->status === 'Selesai' && !$pesanan->payment) {
             try {
-                $snapToken = Snap::getSnapToken($params);
+                // Implementasi Decorator Pattern
+                $basePayment = new BasePayment(
+                    $pesanan->harga,
+                    "Pembayaran untuk pesanan #{$pesanan->id}"
+                );
+
+                $midtransPayment = new MidtransPaymentDecorator($basePayment);
+                $result = $midtransPayment->process();
+
+                $snapToken = $result['snap_token'];
+
+                // Update pesanan dengan token
                 $pesanan->update([
-                    'midtrans_order_id' => $params['transaction_details']['order_id'],
-                    'midtrans_snap_token' => $snapToken
+                    'midtrans_snap_token' => $snapToken,
+                    'midtrans_order_id' => $result['order_id']
                 ]);
-
-                // Reload pesanan with new snap token
-                $pesanan = $pesanan->fresh();
-
             } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Terjadi kesalahan dalam pembuatan transaksi.');
+                logger()->error('Payment Error: ' . $e->getMessage());
+                return back()->with('error', 'Terjadi kesalahan dalam memproses pembayaran');
             }
         }
 
-        return view('customer.pesanan.detail', compact('pesanan'));
+        return view('customer.pesanan.detail', compact('pesanan', 'snapToken'));
     }
 }

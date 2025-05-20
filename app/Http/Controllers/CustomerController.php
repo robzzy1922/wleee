@@ -2,15 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Pesanan;
-use App\Models\Payment;
+use Midtrans\Snap;
+use Midtrans\Config;
 use App\Models\Review;
+use App\Models\Payment;
+use App\Models\Pesanan;
 use App\Models\Customer;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class CustomerController extends Controller
 {
+    public function __construct()
+    {
+        // Midtrans configuration
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = config('midtrans.is_production');
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
+    }
+
     /**
      * Show form to create a new pesanan
      */
@@ -96,7 +108,48 @@ class CustomerController extends Controller
             ->with(['payment', 'progress', 'review'])
             ->findOrFail($id);
 
-        return view('customer.pesanan.detail', compact('pesanan'));
+        $snapToken = null;
+
+        if ($pesanan->status === 'Selesai' && !$pesanan->payment) {
+            Config::$serverKey = config('midtrans.server_key');
+            Config::$isProduction = false;
+            Config::$isSanitized = true;
+            Config::$is3ds = true;
+
+            $orderId = 'ORDER-' . $pesanan->id . '-' . time();
+
+            $transaction_details = [
+                'order_id' => $orderId,
+                'gross_amount' => (int)$pesanan->harga,
+            ];
+
+            $customer_details = [
+                'first_name' => $pesanan->nama,
+                'email' => Auth::user()->email,
+                'phone' => $pesanan->telepon,
+                'address' => $pesanan->alamat,
+            ];
+
+            $transaction_data = [
+                'transaction_details' => $transaction_details,
+                'customer_details' => $customer_details,
+            ];
+
+            try {
+                $snapToken = Snap::getSnapToken($transaction_data);
+
+                // Update pesanan with snap token
+                $pesanan->update([
+                    'midtrans_snap_token' => $snapToken
+                ]);
+
+            } catch (\Exception $e) {
+                Log::error('Midtrans Error: ' . $e->getMessage());
+                return back()->with('error', 'Terjadi kesalahan dalam memproses pembayaran.');
+            }
+        }
+
+        return view('customer.pesanan.detail', compact('pesanan', 'snapToken'));
     }
 
     /**

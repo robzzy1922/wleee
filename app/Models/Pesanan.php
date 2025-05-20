@@ -30,7 +30,7 @@ class Pesanan extends Model
         'harga',
         'estimasi',
         'midtrans_order_id',
-        'midtrans_snap_token',
+        'midtrans_snap_token'
     ];
 
     // Relasi ke User

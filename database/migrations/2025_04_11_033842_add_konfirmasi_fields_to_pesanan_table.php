@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('pesanans', function (Blueprint $table) {
             $table->string('estimasi_waktu')->nullable();
-            $table->string('status_pesanan')->default('Menunggu Konfirmasi Admin');
         });
     }
 
@@ -23,7 +22,7 @@ return new class extends Migration
     public function down()
 {
     Schema::table('pesanan', function (Blueprint $table) {
-        $table->dropColumn(['estimasi_waktu', 'status_pesanan']);
+        $table->dropColumn(['estimasi_waktu']);
     });
 }
 };
