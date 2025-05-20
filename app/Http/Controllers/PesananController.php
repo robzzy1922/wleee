@@ -36,16 +36,9 @@ class PesananController extends Controller
         'jenis_barang' => $request->jenis_barang,
         'keluhan' => $request->keluhan,
         'tanggal_pemesanan' => now(),
-        'status' => 'Menunggu Konfirmasi Admin',
-        'harga' => null,
+        'status' => 'Menunggu Pembayaran',
+        'harga' => 100000, // Set default atau sesuaikan dengan logika bisnis Anda
         'estimasi' => null,
-    ]);
-
-    // Notifikasi
-    Notification::create([
-        'user_id' => Auth::id(),
-        'title' => 'Pesanan Baru Dibuat',
-        'message' => 'Pesanan Anda untuk ' . $pesanan->jenis_barang . ' telah berhasil dibuat dan sedang menunggu konfirmasi admin.',
     ]);
 
     // Konfigurasi Midtrans
@@ -58,7 +51,7 @@ class PesananController extends Controller
     $params = [
         'transaction_details' => [
             'order_id' => 'ORDER-' . $pesanan->id . '-' . time(),
-            'gross_amount' => 100000, // misal default dulu (bisa disesuaikan kemudian)
+            'gross_amount' => $pesanan->harga,
         ],
         'customer_details' => [
             'first_name' => $request->nama,
@@ -67,9 +60,17 @@ class PesananController extends Controller
         ],
     ];
 
-    $snapToken = Snap::getSnapToken($params);
+    try {
+        $snapToken = Snap::getSnapToken($params);
+        $pesanan->update([
+            'midtrans_order_id' => $params['transaction_details']['order_id'],
+            'midtrans_snap_token' => $snapToken
+        ]);
 
-    return view('customer.pesanan.detail', compact('pesanan', 'snapToken'));
+        return view('customer.pesanan.detail', compact('pesanan', 'snapToken'));
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Terjadi kesalahan dalam pembuatan transaksi.');
+    }
 }
 
 
@@ -95,6 +96,41 @@ class PesananController extends Controller
     public function show($id)
     {
         $pesanan = Pesanan::findOrFail($id);
+
+        // Generate snap token if status is waiting for payment
+        if ($pesanan->status === 'Selesai') {
+            // Set Midtrans configuration
+            Config::$serverKey = config('midtrans.server_key');
+            Config::$isProduction = false;
+            Config::$isSanitized = true;
+            Config::$is3ds = true;
+
+            $params = [
+                'transaction_details' => [
+                    'order_id' => 'ORDER-' . $pesanan->id . '-' . time(),
+                    'gross_amount' => $pesanan->harga,
+                ],
+                'customer_details' => [
+                    'first_name' => $pesanan->nama,
+                    'phone' => $pesanan->telepon,
+                    'address' => $pesanan->alamat,
+                ],
+            ];
+
+            try {
+                $snapToken = Snap::getSnapToken($params);
+                $pesanan->update([
+                    'midtrans_order_id' => $params['transaction_details']['order_id'],
+                    'midtrans_snap_token' => $snapToken
+                ]);
+
+                // Reload pesanan with new snap token
+                $pesanan = $pesanan->fresh();
+
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Terjadi kesalahan dalam pembuatan transaksi.');
+            }
+        }
 
         return view('customer.pesanan.detail', compact('pesanan'));
     }
