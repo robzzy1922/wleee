@@ -5,6 +5,9 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Models\Notification;
+use App\Services\Auth\AuthServiceProxy;
+use App\Services\Auth\RealAuthService;
+use App\Services\Auth\IAuthService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +16,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(IAuthService::class, function ($app) {
+            return new AuthServiceProxy(new RealAuthService());
+        });
     }
 
     /**

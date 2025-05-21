@@ -2,14 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Auth\AuthServiceProxy;
+use App\Services\Auth\RealAuthService;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use App\Models\User;
 
 class AuthController extends Controller
 {
+    private $authService;
+
+    public function __construct()
+    {
+        $this->authService = new AuthServiceProxy(new RealAuthService());
+    }
+
     // Tampilkan form login
     public function showLoginForm()
     {
@@ -24,27 +33,28 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+        try {
+            if ($this->authService->login($credentials)) {
+                $request->session()->regenerate();
 
-            return Auth::user()->role === 'admin'
-                ? redirect()->route('admin.dashboard')
-                : redirect()->route('dashboard');
+                return $this->authService->getCurrentUser()->role === 'admin'
+                    ? redirect()->route('admin.dashboard')
+                    : redirect()->route('dashboard');
+            }
+
+            return back()->withErrors(['email' => 'Email atau password salah.'])->withInput();
+        } catch (\Exception $e) {
+            return back()->withErrors(['email' => $e->getMessage()])->withInput();
         }
-
-        return back()->withErrors(['email' => 'Email atau password salah.'])->withInput();
     }
 
     // Proses logout
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-    
+        $this->authService->logout($request);
         return redirect('/')->with('status', 'Anda telah logout.');
     }
-    
+
 
     // Tampilkan form register
     public function showRegisterForm()

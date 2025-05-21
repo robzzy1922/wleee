@@ -12,7 +12,7 @@ class NotificationDecorator extends PaymentDecorator {
         // Tambahkan notifikasi
         Notification::create([
             'user_id' => Auth::user()->id,
-            'title' => 'Pembayaran Diproses',
+            'title' => 'Pembayaran Diprxoses',
             'message' => 'Pembayaran sebesar Rp.' . number_format($this->getAmount()) . ' sedang diproses',
             'target_role' => 'customer'
         ]);
